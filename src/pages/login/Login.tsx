@@ -49,7 +49,10 @@ export function Login() {
       </section>
       <aside className="login__hero" aria-hidden>
         <img src="/hero-dark.jpg" alt="" />
-        <p className="login__tagline">Share a code, earn on every order it brings in.<br />Run all of it from one place.</p>
+        <p className="login__tagline">
+          <small>AC Falcon Crest Ventures</small>
+          Share a code, earn on every order it brings in. Run all of it from one place.
+        </p>
       </aside>
     </div>
   );

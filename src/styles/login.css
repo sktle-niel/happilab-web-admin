@@ -20,14 +20,16 @@
 
 /* The app's own illustration, screened onto a deep green so its black ground becomes the panel. */
 .login__hero { position: relative; overflow: hidden; border-radius: 32px; background: linear-gradient(160deg, var(--green) 0%, var(--green-deep) 100%); min-height: calc(100vh - 48px); }
-.login__hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; mix-blend-mode: screen; opacity: 0.95; }
-.login__tagline { position: absolute; top: 32px; right: 36px; margin: 0; max-width: 360px; text-align: right; color: #fff; font-size: 18px; font-weight: 600; line-height: 1.35; letter-spacing: -0.01em; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35); }
+.login__hero img { position: absolute; top: 0; right: 0; height: 100%; width: auto; mix-blend-mode: screen; opacity: 0.95; -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 45%); mask-image: linear-gradient(to right, transparent 0%, #000 45%); }
+.login__tagline { position: absolute; left: 40px; bottom: 40px; margin: 0; max-width: 340px; color: #fff; font-size: 22px; font-weight: 600; line-height: 1.3; letter-spacing: -0.015em; }
+.login__tagline small { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); margin-bottom: 12px; }
 
 @media (max-width: 900px) {
   .login { grid-template-columns: 1fr; gap: 20px; padding: 16px; }
   .login__form { padding: 8px 4px; order: 2; }
   .login__hero { order: 1; min-height: 200px; border-radius: 24px; }
-  .login__tagline { top: 20px; right: 20px; font-size: 15px; }
+  .login__tagline { left: 20px; bottom: 20px; font-size: 15px; }
+  .login__hero img { height: 120%; }
 }
 @media (prefers-reduced-transparency: reduce) {
   .login__hero img { mix-blend-mode: normal; opacity: 1; }
