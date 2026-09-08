@@ -46,11 +46,11 @@ export function searchAll(query: string): HitGroup[] {
     },
     {
       label: "Products",
-      to: "/products",
+      to: listWith("/products", term),
       hits: products
         .filter((p) => has(q, p.name, p.blurb))
         .slice(0, LIMIT)
-        .map((p) => ({ key: p.id, title: p.name, subtitle: p.blurb, to: "/products" })),
+        .map((p) => ({ key: p.id, title: p.name, subtitle: p.blurb, to: listWith("/products", p.name) })),
     },
   ];
   return groups.filter((group) => group.hits.length > 0);
