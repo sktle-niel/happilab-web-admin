@@ -103,7 +103,6 @@ button { font: inherit; }
 
 @media (max-width: 1100px) {
   :root { --sidebar-w: 208px; }
-  .search { width: 200px; }
 }
 @media (max-width: 820px) {
   .app { grid-template-columns: 1fr; }

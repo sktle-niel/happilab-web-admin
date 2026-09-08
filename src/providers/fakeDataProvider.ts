@@ -20,6 +20,7 @@ const rows = (resource: string): Row[] => {
 
 function matches(row: Row, filter: CrudFilter): boolean {
   if (!("field" in filter)) {
+    if (filter.value.length === 0) return true;
     const results = filter.value.map((inner) => matches(row, inner));
     return filter.operator === "or" ? results.some(Boolean) : results.every(Boolean);
   }

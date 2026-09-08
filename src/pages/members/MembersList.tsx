@@ -4,14 +4,18 @@ import { ListCard } from "../../components/ListCard";
 import { StatusTag } from "../../components/StatusTag";
 import type { Member } from "../../data/fake/people";
 import { dayLabel, thousands } from "../../lib/format";
+import { useSearchFilter } from "../../lib/useSearchFilter";
+
+const FIELDS = ["name", "email", "referralCode"] as const;
 
 export function MembersList() {
   const { tableProps, setFilters } = useTable<Member>({ resource: "members", pagination: { pageSize: 10 }, sorters: { initial: [{ field: "joinedAt", order: "desc" }] } });
+  const { q, search } = useSearchFilter(FIELDS, setFilters);
   return (
     <ListCard
       title="Members"
       subtitle="Everyone who joined with a code, and what their code has brought in."
-      toolbar={<Input.Search allowClear placeholder="Search by name" onSearch={(q) => setFilters([{ field: "name", operator: "contains", value: q }])} />}
+      toolbar={<Input.Search key={q} allowClear defaultValue={q} placeholder="Search name, email or code" onSearch={search} />}
     >
       <Table<Member> {...tableProps} rowKey="id">
         <Table.Column<Member> title="Member" dataIndex="name" sorter render={(_, m) => <><div className="cell-primary">{m.name}</div><div className="cell-muted">{m.email}</div></>} />

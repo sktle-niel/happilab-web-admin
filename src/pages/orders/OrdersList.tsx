@@ -6,14 +6,18 @@ import { ListCard } from "../../components/ListCard";
 import { StatusTag } from "../../components/StatusTag";
 import type { Order } from "../../data/fake/money";
 import { dayLabel, pesos } from "../../lib/format";
+import { useSearchFilter } from "../../lib/useSearchFilter";
+
+const FIELDS = ["externalReference", "buyerName"] as const;
 
 export function OrdersList() {
   const { tableProps, setFilters } = useTable<Order>({ resource: "orders", pagination: { pageSize: 10 }, sorters: { initial: [{ field: "placedAt", order: "desc" }] } });
+  const { q, search } = useSearchFilter(FIELDS, setFilters);
   return (
     <ListCard
       title="Orders"
       subtitle="Every order recorded from the stores, and the points it earned the referrer."
-      toolbar={<Input.Search allowClear placeholder="Search by buyer" onSearch={(q) => setFilters([{ field: "buyerName", operator: "contains", value: q }])} />}
+      toolbar={<Input.Search key={q} allowClear defaultValue={q} placeholder="Search reference or buyer" onSearch={search} />}
       aside={<Button type="primary" icon={<PlusOutlined />} onClick={() => toast("Recording orders lands with the API.")}>Record order</Button>}
     >
       <Table<Order> {...tableProps} rowKey="id">

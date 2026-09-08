@@ -1,5 +1,6 @@
-import { BellOutlined, DownOutlined, SearchOutlined } from "@ant-design/icons";
+import { BellOutlined, DownOutlined } from "@ant-design/icons";
 import { Dropdown } from "antd";
+import { GlobalSearch } from "../components/GlobalSearch";
 import { initials } from "../lib/format";
 import { useStaffSession } from "../providers/session";
 
@@ -23,10 +24,7 @@ export function Topbar() {
         </button>
       </Dropdown>
       <div className="topbar__tools">
-        <label className="search">
-          <SearchOutlined />
-          <input placeholder="Search members, orders, references…" aria-label="Search" />
-        </label>
+        <GlobalSearch />
         <Dropdown menu={{ items: NOTICES }} trigger={["click"]} placement="bottomRight">
           <button type="button" className="bell" aria-label="Notifications">
             <BellOutlined />

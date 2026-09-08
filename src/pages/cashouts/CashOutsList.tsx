@@ -1,10 +1,13 @@
 import { useTable } from "@refinedev/antd";
-import { Button, Segmented, Space, Table } from "antd";
+import { Button, Input, Segmented, Space, Table } from "antd";
 import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
 import { StatusTag } from "../../components/StatusTag";
 import type { CashOut, CashOutStatus } from "../../data/fake/money";
 import { dayLabel, pesos, thousands } from "../../lib/format";
+import { useSearchFilter } from "../../lib/useSearchFilter";
+
+const FIELDS = ["reference", "memberName"] as const;
 
 const FILTERS: { label: string; value: CashOutStatus | "" }[] = [
   { label: "All", value: "" },
@@ -26,12 +29,19 @@ const NEXT: Partial<Record<CashOutStatus, string[]>> = {
 
 export function CashOutsList() {
   const { tableProps, setFilters } = useTable<CashOut>({ resource: "cash-outs", pagination: { pageSize: 10 }, sorters: { initial: [{ field: "requestedAt", order: "desc" }] } });
+  const { q, search } = useSearchFilter(FIELDS, setFilters);
   const act = (what: string, reference: string) => toast(`${what} on ${reference} lands with the API.`);
   return (
     <ListCard
       title="Cash-outs"
       subtitle="Requests waiting on you, and everything already sent."
-      toolbar={<Segmented options={FILTERS} defaultValue="" onChange={(value) => setFilters([{ field: "status", operator: "eq", value }])} />}
+      toolbar={
+        <>
+          <Input.Search key={q} allowClear defaultValue={q} placeholder="Search reference or member" onSearch={search} />
+          <span className="list-toolbar__spacer" />
+          <Segmented options={FILTERS} defaultValue="" onChange={(value) => setFilters([{ field: "status", operator: "eq", value }])} />
+        </>
+      }
     >
       <Table<CashOut> {...tableProps} rowKey="id">
         <Table.Column<CashOut> title="Reference" dataIndex="reference" render={(v: string) => <span className="cell-primary">{v}</span>} />

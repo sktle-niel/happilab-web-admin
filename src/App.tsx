@@ -51,7 +51,7 @@ export function App() {
             authProvider={fakeAuthProvider}
             routerProvider={routerProvider}
             resources={RESOURCES}
-            options={{ syncWithLocation: true, warnWhenUnsavedChanges: false, disableTelemetry: true }}
+            options={{ syncWithLocation: false, warnWhenUnsavedChanges: false, disableTelemetry: true }}
           >
             <Routes>
               <Route

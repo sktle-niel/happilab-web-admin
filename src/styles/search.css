@@ -1,0 +1,27 @@
+.search-wrap { position: relative; }
+.search { width: 320px; }
+.search__kbd { margin-left: auto; font: 500 11px/1 var(--font); color: var(--muted); background: var(--canvas); border-radius: 6px; padding: 4px 6px; }
+.search:focus-within .search__kbd { display: none; }
+
+/* Anchored under the box and scaling from it, the way a popover should. */
+.search-panel { position: absolute; top: calc(100% + 8px); right: 0; width: 400px; max-height: 440px; overflow: auto; background: var(--paper); border-radius: 12px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05); padding: 6px; z-index: 20; transform-origin: top right; transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out); }
+@starting-style { .search-panel { opacity: 0; transform: scale(0.98) translateY(-2px); } }
+.search-panel__group + .search-panel__group { margin-top: 4px; border-top: 1px solid rgba(0, 0, 0, 0.05); padding-top: 4px; }
+.search-panel__label { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.search-panel__label button { border: 0; background: none; color: var(--text-2); font: 500 11px var(--font); cursor: pointer; padding: 2px 6px; border-radius: 6px; text-transform: none; letter-spacing: 0; }
+.search-hit { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 8px; cursor: pointer; color: var(--text); }
+.search-hit.is-active { background: var(--canvas); }
+.search-hit__title { font-weight: 600; font-size: 13px; }
+.search-hit__sub { font-size: 12px; color: var(--text-2); }
+.search-panel__empty { padding: 14px 12px; color: var(--text-2); font-size: 13px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .search-panel__label button:hover { background: rgba(0, 0, 0, 0.05); color: var(--text); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .search-panel { transition: opacity 120ms ease; transform: none !important; }
+}
+@media (max-width: 1100px) {
+  .search { width: 220px; }
+  .search-panel { width: 340px; }
+}
