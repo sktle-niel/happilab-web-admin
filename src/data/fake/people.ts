@@ -1,3 +1,4 @@
+import { ROLE_PRESETS, type PageKey, type StaffRole } from "../../lib/access";
 import { seeded } from "../../lib/seeded";
 
 export type MemberStatus = "active" | "suspended" | "closed";
@@ -15,8 +16,7 @@ export type Member = {
   joinedAt: string;
 };
 
-export type StaffRole = "owner" | "admin" | "support";
-export type Staff = { id: string; name: string; email: string; role: StaffRole; status: "active" | "suspended"; lastSeenAt: string | null };
+export type Staff = { id: string; name: string; email: string; role: StaffRole; pages: PageKey[]; status: "active" | "suspended"; lastSeenAt: string | null };
 
 const FIRST = ["Maria", "Paolo", "Jen", "Kim", "Ana", "Ivy", "Carlo", "Bea", "Miguel", "Liza", "Ramon", "Tess", "Noel", "Grace", "Dan", "Rhea", "Jun", "Faith", "Leo", "Nica"];
 const LAST = ["Cruz", "Mendoza", "Reyes", "Bautista", "Villanueva", "Santos", "Garcia", "Torres", "Flores", "Ramos", "Dela Cruz", "Castro", "Aquino", "Navarro", "Lim"];
@@ -47,8 +47,8 @@ export const members: Member[] = Array.from({ length: 96 }, (_, i) => {
 });
 
 export const staff: Staff[] = [
-  { id: "s001", name: "Niel Ladica", email: "niel@falconcrest.ph", role: "owner", status: "active", lastSeenAt: isoDaysAgo(0) },
-  { id: "s002", name: "Maria Santos", email: "maria@falconcrest.ph", role: "admin", status: "active", lastSeenAt: isoDaysAgo(1) },
-  { id: "s003", name: "Paolo Reyes", email: "paolo@falconcrest.ph", role: "support", status: "active", lastSeenAt: isoDaysAgo(0) },
-  { id: "s004", name: "Jen Cruz", email: "jen@falconcrest.ph", role: "support", status: "suspended", lastSeenAt: isoDaysAgo(23) },
+  { id: "s001", name: "Niel Ladica", email: "niel@falconcrest.ph", role: "owner", pages: ROLE_PRESETS.owner, status: "active", lastSeenAt: isoDaysAgo(0) },
+  { id: "s002", name: "Maria Santos", email: "maria@falconcrest.ph", role: "admin", pages: ROLE_PRESETS.admin, status: "active", lastSeenAt: isoDaysAgo(1) },
+  { id: "s003", name: "Paolo Reyes", email: "paolo@falconcrest.ph", role: "support", pages: ROLE_PRESETS.support, status: "active", lastSeenAt: isoDaysAgo(0) },
+  { id: "s004", name: "Jen Cruz", email: "jen@falconcrest.ph", role: "support", pages: [...ROLE_PRESETS.support, "orders"], status: "suspended", lastSeenAt: isoDaysAgo(23) },
 ];

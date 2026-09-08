@@ -1,4 +1,6 @@
 import type { AuthProvider } from "@refinedev/core";
+import { staff } from "../data/fake/people";
+import { ROLE_PRESETS } from "../lib/access";
 import { previewing } from "../lib/env";
 import { passwordMeetsPolicy } from "../lib/password";
 import type { StaffIdentity } from "./session";
@@ -97,10 +99,16 @@ export const fakeAuthProvider: AuthProvider = {
     return { authenticated: true };
   },
 
+  /** The staff record behind the session; an address the bundled list does not know signs in as the owner. */
   getIdentity: async (): Promise<StaffIdentity | null> => {
     const session = read<Session>(localStorage, SESSION);
-    if (session) return { id: "s001", name: "Niel Ladica", email: session.email, role: "owner" };
-    return previewing ? { id: "preview", name: "Preview", email: "preview@falconcrest.ph", role: "owner" } : null;
+    if (session) {
+      const account = staff.find((s) => s.email === session.email);
+      return account
+        ? { id: account.id, name: account.name, email: account.email, role: account.role, pages: account.pages }
+        : { id: "s001", name: "Niel Ladica", email: session.email, role: "owner", pages: ROLE_PRESETS.owner };
+    }
+    return previewing ? { id: "preview", name: "Preview", email: "preview@falconcrest.ph", role: "owner", pages: ROLE_PRESETS.owner } : null;
   },
 
   /** The link would go to the email; on bundled data the page shows it. */

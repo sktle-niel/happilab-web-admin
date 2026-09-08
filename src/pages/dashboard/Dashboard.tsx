@@ -1,11 +1,13 @@
 import { DownOutlined } from "@ant-design/icons";
 import { Dropdown } from "antd";
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { PageHead } from "../../components/Card";
 import { overview } from "../../data/fake/dashboard";
+import { canOpen, type PageKey } from "../../lib/access";
 import { dayLabel } from "../../lib/format";
+import { useStaffSession } from "../../providers/session";
 import { CashOutsChart } from "./CashOutsChart";
-import { OrdersTodayCard, PointsFlowCard, QueueCard, SignInsCard, StatCards } from "./widgets";
+import { ActiveMembersCard, CashOutsPendingCard, OrdersTodayCard, PointsFlowCard, PointsIssuedCard, QueueCard, SignInsCard } from "./widgets";
 
 const RANGES = [
   { key: "today", label: "Today" },
@@ -27,19 +29,33 @@ function RangePill() {
   );
 }
 
+/** Each card belongs to a page; an account sees the cards of the pages it may open. */
+const CARDS: { page: PageKey; card: () => ReactElement }[] = [
+  { page: "dashboard", card: PointsIssuedCard },
+  { page: "cash-outs", card: CashOutsPendingCard },
+  { page: "members", card: ActiveMembersCard },
+  { page: "dashboard", card: PointsFlowCard },
+  { page: "support", card: QueueCard },
+  { page: "members", card: SignInsCard },
+  { page: "orders", card: OrdersTodayCard },
+  { page: "cash-outs", card: CashOutsChart },
+];
+
+const firstName = (name: string) => name.split(" ")[0] ?? name;
+
 export function Dashboard() {
+  const { identity } = useStaffSession();
+  const cards = CARDS.filter(({ page }) => canOpen(identity?.pages, page));
+  const onTheDesk = identity?.role === "support";
   return (
     <>
-      <PageHead title="Programme Overview" subtitle="How the referral programme is doing today." aside={<RangePill />} />
+      <PageHead
+        title={onTheDesk ? `Your desk, ${firstName(identity?.name ?? "")}` : "Programme Overview"}
+        subtitle={onTheDesk ? "What is waiting for you today." : "How the referral programme is doing today."}
+        aside={<RangePill />}
+      />
       <section className="dash stagger">
-        <StatCards />
-        <PointsFlowCard />
-        <div className="dash__side">
-          <QueueCard />
-          <OrdersTodayCard />
-        </div>
-        <SignInsCard />
-        <CashOutsChart />
+        {cards.map(({ card: Card }, i) => <Card key={i} />)}
       </section>
     </>
   );

@@ -1,8 +1,13 @@
 import { NavLink, useNavigate } from "react-router";
+import { canOpen } from "../lib/access";
+import { useStaffSession } from "../providers/session";
 import { NAV } from "./nav";
 
+/** Only the pages this account may open; the rest do not exist as far as the sidebar knows. */
 export function Sidebar() {
   const navigate = useNavigate();
+  const { identity } = useStaffSession();
+  const items = NAV.filter((item) => canOpen(identity?.pages, item.key));
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
@@ -10,7 +15,7 @@ export function Sidebar() {
         Falcon Crest
       </div>
       <nav>
-        {NAV.map(({ to, label, icon: Icon, badge }) => (
+        {items.map(({ to, label, icon: Icon, badge }) => (
           <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => `nav__item${isActive ? " is-active" : ""}`}>
             <span className="nav__icon"><Icon /></span>
             {label}

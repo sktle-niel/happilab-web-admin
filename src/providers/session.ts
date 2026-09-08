@@ -1,7 +1,9 @@
 import { useForgotPassword, useGetIdentity, useLogin, useLogout, useUpdatePassword } from "@refinedev/core";
 import type { LoginParams } from "./fakeAuthProvider";
 
-export type StaffIdentity = { id: string; name: string; email: string; role: "owner" | "admin" | "support" };
+import type { PageKey, StaffRole } from "../lib/access";
+
+export type StaffIdentity = { id: string; name: string; email: string; role: StaffRole; pages: PageKey[] };
 
 /** The signed-in staff account and every way in and out, so no screen imports Refine's auth hooks directly. */
 export function useStaffSession() {

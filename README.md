@@ -29,6 +29,12 @@ VITE_BACKEND=api VITE_API_BASE_URL=https://api.example.com npm run build
 To review pages without signing in, run with `VITE_SKIP_AUTH=1`. It is
 honoured only on bundled data; the API build never skips sign-in.
 
+Access is per account: the Staff page sets which pages each one may
+open, and the sidebar, the routes and the dashboard follow. On bundled
+data, sign in as `paolo@falconcrest.ph` (support) or `maria@falconcrest.ph`
+(admin) with any 12-character password and code `123456` to see the
+narrower views; any other address signs in as the owner.
+
 ## Layout
 
 ```

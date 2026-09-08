@@ -3,20 +3,30 @@ import { overview, signInLevels } from "../../data/fake/dashboard";
 import { compact, initials, pesos, thousands } from "../../lib/format";
 import { Card, Stat } from "../../components/Card";
 
-export function StatCards() {
-  const { pointsIssued, pending, activeMembers } = overview;
+export function PointsIssuedCard() {
+  const { pointsIssued } = overview;
   return (
-    <>
-      <Card className="dash__stat" spot="points-issued" icon={<ThunderboltOutlined />} title="Points issued">
-        <Stat value={compact(pointsIssued.value)} unit="pts this month" chip={`+${pointsIssued.deltaPercent}%`} />
-      </Card>
-      <Card className="dash__stat" spot="cash-outs-pending" icon={<WalletOutlined />} title="Cash-outs pending">
-        <Stat value={String(pending.count)} unit="requests" aside={{ label: "Waiting", value: pesos(pending.pesos) }} />
-      </Card>
-      <Card className="dash__stat" spot="active-members" icon={<TeamOutlined />} title="Active members">
-        <Stat value={thousands(activeMembers.value)} unit="members" chip={`+${activeMembers.deltaPercent}%`} />
-      </Card>
-    </>
+    <Card className="dash__stat" spot="points-issued" icon={<ThunderboltOutlined />} title="Points issued">
+      <Stat value={compact(pointsIssued.value)} unit="pts this month" chip={`+${pointsIssued.deltaPercent}%`} />
+    </Card>
+  );
+}
+
+export function CashOutsPendingCard() {
+  const { pending } = overview;
+  return (
+    <Card className="dash__stat" spot="cash-outs-pending" icon={<WalletOutlined />} title="Cash-outs pending">
+      <Stat value={String(pending.count)} unit="requests" aside={{ label: "Waiting", value: pesos(pending.pesos) }} />
+    </Card>
+  );
+}
+
+export function ActiveMembersCard() {
+  const { activeMembers } = overview;
+  return (
+    <Card className="dash__stat" spot="active-members" icon={<TeamOutlined />} title="Active members">
+      <Stat value={thousands(activeMembers.value)} unit="members" chip={`+${activeMembers.deltaPercent}%`} />
+    </Card>
   );
 }
 

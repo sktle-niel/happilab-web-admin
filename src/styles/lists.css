@@ -12,3 +12,11 @@
 .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
 .settings-grid { align-items: start; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
 .settings-grid .card h3 { margin: 0 0 14px; font-size: 15px; }
+
+/* Staff access: the page boxes in two columns; the no-access card. */
+.page-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+.page-grid .ant-checkbox-wrapper { margin: 0; }
+.no-access { max-width: 440px; margin: 48px auto; text-align: center; padding: 32px 28px; }
+.no-access .card__icon { margin: 0 auto 14px; width: 40px; height: 40px; font-size: 18px; }
+.no-access h2 { margin: 0 0 6px; font-size: 18px; letter-spacing: -0.01em; }
+.no-access p { margin: 0 0 18px; color: var(--text-2); font-size: 13.5px; }
