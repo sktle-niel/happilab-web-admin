@@ -4,6 +4,7 @@ import { ConfigProvider } from "antd";
 import { Toaster } from "sonner";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { AppFrame } from "./layout/AppFrame";
+import { previewing } from "./lib/env";
 import { AuditList } from "./pages/audit/AuditList";
 import { CashOutsList } from "./pages/cashouts/CashOutsList";
 import { ContentPage } from "./pages/content/ContentPage";
@@ -79,9 +80,13 @@ export function App() {
               </Route>
               <Route
                 element={
-                  <Authenticated key="signed-out" fallback={<Outlet />}>
-                    <NavigateToResource resource="dashboard" />
-                  </Authenticated>
+                  previewing ? (
+                    <Outlet />
+                  ) : (
+                    <Authenticated key="signed-out" fallback={<Outlet />}>
+                      <NavigateToResource resource="dashboard" />
+                    </Authenticated>
+                  )
                 }
               >
                 <Route path="/login" element={<Login />} />

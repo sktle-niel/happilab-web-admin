@@ -1,4 +1,5 @@
 import type { AuthProvider } from "@refinedev/core";
+import { previewing } from "../lib/env";
 import { passwordMeetsPolicy } from "../lib/password";
 import type { StaffIdentity } from "./session";
 
@@ -84,6 +85,7 @@ export const fakeAuthProvider: AuthProvider = {
 
   /** Every visit renews the seven days; a visit after them ends the session instead. */
   check: async () => {
+    if (previewing) return { authenticated: true };
     const session = read<Session>(localStorage, SESSION);
     if (!session) return { authenticated: false, redirectTo: "/login", logout: true };
     if (Date.now() - session.lastSeen > IDLE_MS) {
@@ -97,7 +99,8 @@ export const fakeAuthProvider: AuthProvider = {
 
   getIdentity: async (): Promise<StaffIdentity | null> => {
     const session = read<Session>(localStorage, SESSION);
-    return session ? { id: "s001", name: "Niel Ladica", email: session.email, role: "owner" } : null;
+    if (session) return { id: "s001", name: "Niel Ladica", email: session.email, role: "owner" };
+    return previewing ? { id: "preview", name: "Preview", email: "preview@falconcrest.ph", role: "owner" } : null;
   },
 
   /** The link would go to the email; on bundled data the page shows it. */

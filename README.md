@@ -26,6 +26,9 @@ build-time switch, mirroring the app's `BACKEND` define:
 VITE_BACKEND=api VITE_API_BASE_URL=https://api.example.com npm run build
 ```
 
+To review pages without signing in, run with `VITE_SKIP_AUTH=1`. It is
+honoured only on bundled data; the API build never skips sign-in.
+
 ## Layout
 
 ```

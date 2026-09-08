@@ -1,10 +1,11 @@
 import { Button, Form, Input } from "antd";
 import { Link, useSearchParams } from "react-router";
+import { backend } from "../../lib/env";
 import { FAKE_RESET_TOKEN } from "../../providers/fakeAuthProvider";
 import { useStaffSession } from "../../providers/session";
 import { Field, LoginShell } from "./LoginShell";
 
-const onBundledData = import.meta.env.VITE_BACKEND !== "api";
+const onBundledData = backend === "fake";
 
 /** Asks for the address, then says the link is on its way. */
 export function Forgot() {

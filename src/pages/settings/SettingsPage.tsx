@@ -12,7 +12,7 @@ const DEFAULTS = {
   support: { status_line: "Online · replies within 24 hours", acknowledgement: "Thanks, we have got it. A teammate will reply here within 24 hours." },
 };
 
-const backend = import.meta.env.VITE_BACKEND ?? "fake";
+import { backend } from "../../lib/env";
 const apiUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 
 function SettingsCard({ title, spot, children }: { title: string; spot: string; children: ReactNode }) {
