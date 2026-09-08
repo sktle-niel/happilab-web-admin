@@ -1,7 +1,8 @@
 import { useTable } from "@refinedev/antd";
-import { Button, Input, Segmented, Space, Table } from "antd";
+import { Button, Segmented, Space, Table } from "antd";
 import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
+import { SearchBox } from "../../components/SearchBox";
 import { StatusTag } from "../../components/StatusTag";
 import type { CashOut, CashOutStatus } from "../../data/fake/money";
 import { dayLabel, pesos, thousands } from "../../lib/format";
@@ -37,7 +38,7 @@ export function CashOutsList() {
       subtitle="Requests waiting on you, and everything already sent."
       toolbar={
         <>
-          <Input.Search key={q} allowClear defaultValue={q} placeholder="Search reference or member" onSearch={search} />
+          <SearchBox initial={q} placeholder="Search reference or member" onSearch={search} />
           <span className="list-toolbar__spacer" />
           <Segmented options={FILTERS} defaultValue="" onChange={(value) => setFilters([{ field: "status", operator: "eq", value }])} />
         </>

@@ -4,7 +4,7 @@
 .list-card .ant-table-thead > tr > th { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
 .list-card .ant-pagination { padding: 0 12px; }
 .list-toolbar { display: flex; gap: 10px; align-items: center; padding: 12px 12px 6px; flex-wrap: wrap; }
-.list-toolbar .ant-input-affix-wrapper { width: 280px; }
+.list-search { width: 300px; }
 .list-toolbar__spacer { flex: 1; }
 .cell-primary { font-weight: 700; }
 .cell-muted { color: var(--text-2); font-size: 12px; }
