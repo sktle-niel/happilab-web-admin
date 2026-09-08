@@ -1,6 +1,7 @@
 import { useTable } from "@refinedev/antd";
-import { Input, Table } from "antd";
+import { Table } from "antd";
 import { ListCard } from "../../components/ListCard";
+import { SearchBox } from "../../components/SearchBox";
 import { StatusTag } from "../../components/StatusTag";
 import type { Member } from "../../data/fake/people";
 import { dayLabel, thousands } from "../../lib/format";
@@ -15,7 +16,7 @@ export function MembersList() {
     <ListCard
       title="Members"
       subtitle="Everyone who joined with a code, and what their code has brought in."
-      toolbar={<Input.Search key={q} allowClear defaultValue={q} placeholder="Search name, email or code" onSearch={search} />}
+      toolbar={<SearchBox initial={q} placeholder="Search name, email or code" onSearch={search} />}
     >
       <Table<Member> {...tableProps} rowKey="id">
         <Table.Column<Member> title="Member" dataIndex="name" sorter render={(_, m) => <><div className="cell-primary">{m.name}</div><div className="cell-muted">{m.email}</div></>} />
