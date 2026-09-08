@@ -87,6 +87,14 @@ export function App() {
                   }
                 />
               ))}
+              <Route
+                path="/support/:id"
+                element={
+                  <CanAccess resource="support" action="list" fallback={<NoAccess />}>
+                    <SupportPage />
+                  </CanAccess>
+                }
+              />
             </Route>
             <Route
               element={

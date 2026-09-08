@@ -1,5 +1,7 @@
 import { CustomerServiceOutlined, ShoppingOutlined, SwapOutlined, TeamOutlined, ThunderboltOutlined, WalletOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router";
 import { overview, signInLevels } from "../../data/fake/dashboard";
+import { useConversations } from "../../data/fake/support";
 import { compact, initials, pesos, thousands } from "../../lib/format";
 import { Card, Stat } from "../../components/Card";
 
@@ -56,18 +58,20 @@ export function PointsFlowCard() {
   );
 }
 
+/** Who is in line right now; a row opens the conversation. */
 export function QueueCard() {
-  const { queue } = overview;
+  const navigate = useNavigate();
+  const queued = useConversations().filter((c) => c.status === "queued");
   return (
     <Card className="dash__small" spot="support-queue" icon={<CustomerServiceOutlined />} title="Support queue">
-      <Stat value={String(queue.waiting)} unit="in line" aside={{ label: "Avg wait", value: `${queue.averageWaitMinutes} min` }} />
+      <Stat value={String(queued.length)} unit="in line" aside={{ label: "Avg wait", value: `${overview.queue.averageWaitMinutes} min` }} />
       <div className="queue">
-        {queue.names.map((name, i) => (
-          <div className="queue__row" key={name}>
-            <span className="queue__avatar">{initials(name)}</span>
-            <b>{name}</b>
+        {queued.map((c, i) => (
+          <button type="button" className="queue__row" key={c.id} onClick={() => navigate(`/support/${c.id}`)}>
+            <span className="queue__avatar">{initials(c.memberName)}</span>
+            <b>{c.memberName}</b>
             <span>#{i + 1}</span>
-          </div>
+          </button>
         ))}
       </div>
     </Card>
