@@ -1,3 +1,5 @@
+import { MoreOutlined } from "@ant-design/icons";
+import { App, Dropdown } from "antd";
 import type { ReactNode } from "react";
 
 type CardProps = {
@@ -9,14 +11,36 @@ type CardProps = {
   action?: ReactNode;
 };
 
-/** The dashboard's card: an icon in a circle, a title, a kebab or an action, then whatever it holds. */
+/** The card's own menu: the two things every figure on the dashboard can do. */
+function CardMenu({ title }: { title: string }) {
+  const { message } = App.useApp();
+  return (
+    <Dropdown
+      trigger={["click"]}
+      placement="bottomRight"
+      menu={{
+        items: [
+          { key: "report", label: "Open report" },
+          { key: "export", label: "Export as CSV" },
+        ],
+        onClick: ({ key }) => message.info(`${key === "report" ? "The report" : "The export"} for ${title} lands with the API.`),
+      }}
+    >
+      <button type="button" className="card__kebab" aria-label={`${title} menu`}>
+        <MoreOutlined />
+      </button>
+    </Dropdown>
+  );
+}
+
+/** The dashboard's card: an icon in a circle, a title, a menu or an action, then whatever it holds. */
 export function Card({ title, icon, children, dark = false, className = "", action }: CardProps) {
   return (
     <article className={`card ${dark ? "card--dark" : ""} ${className}`.trim()}>
       <header className="card__head">
         <span className="card__icon">{icon}</span>
         <span className="card__title">{title}</span>
-        {action ?? <span className="card__kebab" aria-hidden>⋮</span>}
+        {action ?? <CardMenu title={title} />}
       </header>
       {children}
     </article>

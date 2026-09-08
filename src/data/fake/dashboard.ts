@@ -14,10 +14,17 @@ export const overview = {
   ],
   queue: { waiting: 3, averageWaitMinutes: 4, names: ["Ana Villanueva", "Kim Bautista", "Leo Ramos"] },
   ordersToday: { count: 27, pesos: 12_400 },
-  cashOutsByMonth: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((month, i) => ({
-    month,
+  cashOutsByMonth: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((label, i) => ({
+    label,
+    current: i === 8,
     requested: [18, 22, 25, 30, 28, 34, 31, 39, 41, 0, 0, 0][i] ?? 0,
     sent: [16, 21, 24, 27, 27, 31, 30, 36, 33, 0, 0, 0][i] ?? 0,
+  })),
+  cashOutsByWeek: ["W29", "W30", "W31", "W32", "W33", "W34", "W35", "W36", "W37"].map((label, i) => ({
+    label,
+    current: i === 8,
+    requested: [7, 9, 8, 11, 10, 12, 9, 13, 8][i] ?? 0,
+    sent: [7, 8, 8, 10, 9, 11, 9, 12, 5][i] ?? 0,
   })),
   sentThisMonth: 41_000,
   averageSendHours: 74,
