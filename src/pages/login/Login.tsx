@@ -1,4 +1,4 @@
-import { FacebookFilled } from "@ant-design/icons";
+import { CheckOutlined, FacebookFilled } from "@ant-design/icons";
 import { Button, Checkbox, ConfigProvider, Form, Input } from "antd";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
@@ -22,6 +22,29 @@ function Field({ label, name, rules, children }: { label: string; name: string; 
 
 const soon = (what: string) => () => toast(`${what} lands with the API.`);
 
+/** The panel: the parrot, the line about the programme, and three glimpses of what is happening inside. */
+function Hero() {
+  return (
+    <aside className="login__hero stagger" aria-hidden>
+      <p className="login__tagline">Share a code, earn on every order it brings in, and run all of it from one place.</p>
+      <div className="peek peek--stat">
+        <span className="peek__label">Points issued</span>
+        <span className="peek__value">48.2k <i className="chip">+12%</i></span>
+        <span className="peek__sub">this month</span>
+      </div>
+      <div className="peek peek--sent">
+        <span className="peek__check"><CheckOutlined /></span>
+        <span><b>₱1,000 sent to GCash</b><small>Maria Cruz · 2 min ago</small></span>
+      </div>
+      <div className="peek peek--members">
+        <span className="peek__avatars"><i>MC</i><i>PR</i><i>JB</i></span>
+        <span><b>1,284 members</b><small>shared a code this week</small></span>
+      </div>
+      <img className="login__parrot" src="/parrot-640.png" alt="" />
+    </aside>
+  );
+}
+
 export function Login() {
   const { signIn, isSigningIn } = useStaffSession();
   return (
@@ -29,7 +52,7 @@ export function Login() {
       <div className="login__inner">
         <section className="login__form">
           <div className="login__brand">
-            <img src="/brand-mark.png" alt="" />
+            <img src="/parrot-96.png" alt="" />
             <span>Falcon Crest<i>.</i></span>
           </div>
           <h1>Welcome back</h1>
@@ -62,11 +85,7 @@ export function Login() {
           </ConfigProvider>
           <p className="login__note">Don't have an account? <button type="button" className="login__link login__link--plain" onClick={soon("Access requests")}>Request access</button></p>
         </section>
-
-        <aside className="login__hero" aria-hidden>
-          <img src="/hero-dark.jpg" alt="" />
-          <p className="login__tagline">Share a code, earn on every order it brings in, and run all of it from one place.</p>
-        </aside>
+        <Hero />
       </div>
     </div>
   );
