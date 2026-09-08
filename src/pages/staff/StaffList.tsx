@@ -1,6 +1,7 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useTable } from "@refinedev/antd";
-import { App, Button, Table } from "antd";
+import { Button, Table } from "antd";
+import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
 import { StatusTag } from "../../components/StatusTag";
 import type { Staff } from "../../data/fake/people";
@@ -9,13 +10,12 @@ import { dayLabel, initials } from "../../lib/format";
 const ROLE: Record<Staff["role"], string> = { owner: "Owner", admin: "Admin", support: "Support" };
 
 export function StaffList() {
-  const { message } = App.useApp();
   const { tableProps } = useTable<Staff>({ resource: "staff", pagination: { mode: "off" } });
   return (
     <ListCard
       title="Staff"
       subtitle="Who runs the programme, and what each of them may touch."
-      aside={<Button type="primary" icon={<PlusOutlined />} onClick={() => message.info("Inviting staff lands with the API.")}>Add staff</Button>}
+      aside={<Button type="primary" icon={<PlusOutlined />} onClick={() => toast("Inviting staff lands with the API.")}>Add staff</Button>}
     >
       <Table<Staff> {...tableProps} rowKey="id" pagination={false}>
         <Table.Column<Staff> title="Account" dataIndex="name" render={(_, s) => (

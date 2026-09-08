@@ -1,5 +1,6 @@
 import { MoreOutlined } from "@ant-design/icons";
-import { App, Dropdown } from "antd";
+import { Dropdown } from "antd";
+import { toast } from "sonner";
 import type { ReactNode } from "react";
 
 type CardProps = {
@@ -13,7 +14,6 @@ type CardProps = {
 
 /** The card's own menu: the two things every figure on the dashboard can do. */
 function CardMenu({ title }: { title: string }) {
-  const { message } = App.useApp();
   return (
     <Dropdown
       trigger={["click"]}
@@ -23,7 +23,7 @@ function CardMenu({ title }: { title: string }) {
           { key: "report", label: "Open report" },
           { key: "export", label: "Export as CSV" },
         ],
-        onClick: ({ key }) => message.info(`${key === "report" ? "The report" : "The export"} for ${title} lands with the API.`),
+        onClick: ({ key }) => toast(`${key === "report" ? "The report" : "The export"} for ${title} lands with the API.`),
       }}
     >
       <button type="button" className="card__kebab" aria-label={`${title} menu`}>

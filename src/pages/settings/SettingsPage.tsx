@@ -1,5 +1,6 @@
 import { InboxOutlined } from "@ant-design/icons";
-import { App, Button, Checkbox, Form, Input, InputNumber, Select, Upload } from "antd";
+import { Button, Checkbox, Form, Input, InputNumber, Select, Upload } from "antd";
+import { toast } from "sonner";
 import { PageHead } from "../../components/Card";
 
 /** The keys the API keeps under /v1/admin/settings, one card each, with the Falcon Crest defaults filled in. */
@@ -22,8 +23,7 @@ function SettingsCard({ title, children }: { title: string; children: React.Reac
 }
 
 export function SettingsPage() {
-  const { message } = App.useApp();
-  const save = (key: string) => () => message.success(`${key} saved for this session. The API keeps it once connected.`);
+  const save = (key: string) => () => toast.success(`${key} saved for this session. The API keeps it once connected.`);
   return (
     <>
       <PageHead title="Settings" subtitle="What the app says, shows and promises. Every change reaches members on their next launch." />
@@ -51,7 +51,7 @@ export function SettingsPage() {
 
         <SettingsCard title="Assets">
           <p className="cell-muted" style={{ marginTop: 0 }}>The backdrop behind every screen, the logo, and the onboarding clips. Images and mp4 only.</p>
-          <Upload.Dragger multiple={false} beforeUpload={() => { message.info("Uploads land with the API and Supabase Storage."); return Upload.LIST_IGNORE; }}>
+          <Upload.Dragger multiple={false} beforeUpload={() => { toast("Uploads land with the API and Supabase Storage."); return Upload.LIST_IGNORE; }}>
             <p className="ant-upload-drag-icon"><InboxOutlined /></p>
             <p className="ant-upload-text">Drop a backdrop, logo or clip here</p>
             <p className="ant-upload-hint">Signed straight into storage; the app picks it up on its next launch.</p>

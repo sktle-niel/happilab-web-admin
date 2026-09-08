@@ -1,6 +1,7 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useTable } from "@refinedev/antd";
-import { App, Button, Switch, Table } from "antd";
+import { Button, Switch, Table } from "antd";
+import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
 import type { Product } from "../../data/fake/catalogue";
 import { pesos } from "../../lib/format";
@@ -8,9 +9,8 @@ import { pesos } from "../../lib/format";
 const BADGE: Record<string, string> = { topSale: "Top sale", newArrival: "New", comingSoon: "Coming soon" };
 
 export function ProductsList() {
-  const { message } = App.useApp();
   const { tableProps } = useTable<Product>({ resource: "products", pagination: { mode: "off" }, sorters: { initial: [{ field: "position", order: "asc" }] } });
-  const notYet = () => message.info("Editing lands with the API.");
+  const notYet = () => toast("Editing lands with the API.");
   return (
     <ListCard
       title="Products"

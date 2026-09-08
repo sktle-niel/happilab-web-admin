@@ -1,6 +1,7 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useTable } from "@refinedev/antd";
-import { App, Button, Table, Tabs } from "antd";
+import { Button, Table, Tabs } from "antd";
+import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
 import { StatusTag } from "../../components/StatusTag";
 import type { Faq, Post } from "../../data/fake/catalogue";
@@ -33,12 +34,11 @@ function Faqs() {
 }
 
 export function ContentPage() {
-  const { message } = App.useApp();
   return (
     <ListCard
       title="Content"
       subtitle="What the feed says, and the help copy members read."
-      aside={<Button type="primary" icon={<PlusOutlined />} onClick={() => message.info("Writing posts lands with the API.")}>New post</Button>}
+      aside={<Button type="primary" icon={<PlusOutlined />} onClick={() => toast("Writing posts lands with the API.")}>New post</Button>}
     >
       <Tabs
         style={{ padding: "0 12px" }}

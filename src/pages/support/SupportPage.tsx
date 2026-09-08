@@ -1,5 +1,6 @@
 import { CustomerServiceOutlined, TeamOutlined } from "@ant-design/icons";
-import { App, Button, List } from "antd";
+import { Button, List } from "antd";
+import { toast } from "sonner";
 import { Card, PageHead, Stat } from "../../components/Card";
 import { overview } from "../../data/fake/dashboard";
 import { staff } from "../../data/fake/people";
@@ -7,7 +8,6 @@ import { initials } from "../../lib/format";
 
 /** The desk: who is waiting, who is on. Lives on bundled figures until the push channel exists. */
 export function SupportPage() {
-  const { message } = App.useApp();
   const { queue } = overview;
   const agents = staff.filter((s) => s.role === "support" && s.status === "active");
   return (
@@ -19,7 +19,7 @@ export function SupportPage() {
           <List
             dataSource={queue.names}
             renderItem={(name, i) => (
-              <List.Item actions={[<Button key="join" size="small" type="primary" onClick={() => message.info("Joining a chat lands with the push channel.")}>Join</Button>]}>
+              <List.Item actions={[<Button key="join" size="small" type="primary" onClick={() => toast("Joining a chat lands with the push channel.")}>Join</Button>]}>
                 <List.Item.Meta avatar={<span className="queue__avatar">{initials(name)}</span>} title={name} description={`#${i + 1} in line · asked ${3 + i * 2} min ago`} />
               </List.Item>
             )}

@@ -1,5 +1,6 @@
 import { useTable } from "@refinedev/antd";
-import { App, Button, Segmented, Space, Table } from "antd";
+import { Button, Segmented, Space, Table } from "antd";
+import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
 import { StatusTag } from "../../components/StatusTag";
 import type { CashOut, CashOutStatus } from "../../data/fake/money";
@@ -24,9 +25,8 @@ const NEXT: Partial<Record<CashOutStatus, string[]>> = {
 };
 
 export function CashOutsList() {
-  const { message } = App.useApp();
   const { tableProps, setFilters } = useTable<CashOut>({ resource: "cash-outs", pagination: { pageSize: 10 }, sorters: { initial: [{ field: "requestedAt", order: "desc" }] } });
-  const act = (what: string, reference: string) => message.info(`${what} on ${reference} lands with the API.`);
+  const act = (what: string, reference: string) => toast(`${what} on ${reference} lands with the API.`);
   return (
     <ListCard
       title="Cash-outs"
