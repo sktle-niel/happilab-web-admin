@@ -1,6 +1,6 @@
 import { DownOutlined } from "@ant-design/icons";
 import { Dropdown } from "antd";
-import { useState, type ReactElement } from "react";
+import { useState } from "react";
 import { PageHead } from "../../components/Card";
 import { overview } from "../../data/fake/dashboard";
 import { canOpen, type PageKey } from "../../lib/access";
@@ -29,23 +29,16 @@ function RangePill() {
   );
 }
 
-/** Each card belongs to a page; an account sees the cards of the pages it may open. */
-const CARDS: { page: PageKey; card: () => ReactElement }[] = [
-  { page: "dashboard", card: PointsIssuedCard },
-  { page: "cash-outs", card: CashOutsPendingCard },
-  { page: "members", card: ActiveMembersCard },
-  { page: "dashboard", card: PointsFlowCard },
-  { page: "support", card: QueueCard },
-  { page: "members", card: SignInsCard },
-  { page: "orders", card: OrdersTodayCard },
-  { page: "cash-outs", card: CashOutsChart },
-];
-
 const firstName = (name: string) => name.split(" ")[0] ?? name;
 
+/**
+ * Three tiers: the figures across the top, the points flow down the left,
+ * and on the right the small cards two abreast with the chart beneath.
+ * Every card belongs to a page; an account sees the cards of its pages.
+ */
 export function Dashboard() {
   const { identity } = useStaffSession();
-  const cards = CARDS.filter(({ page }) => canOpen(identity?.pages, page));
+  const may = (page: PageKey) => canOpen(identity?.pages, page);
   const onTheDesk = identity?.role === "support";
   return (
     <>
@@ -54,8 +47,21 @@ export function Dashboard() {
         subtitle={onTheDesk ? "What is waiting for you today." : "How the referral programme is doing today."}
         aside={<RangePill />}
       />
-      <section className="dash stagger">
-        {cards.map(({ card: Card }, i) => <Card key={i} />)}
+      <section className="dash">
+        <div className="dash__stats stagger">
+          <PointsIssuedCard />
+          {may("cash-outs") && <CashOutsPendingCard />}
+          {may("members") && <ActiveMembersCard />}
+        </div>
+        <div className="dash__body">
+          <PointsFlowCard />
+          <div className="dash__right stagger">
+            {may("support") && <QueueCard />}
+            {may("members") && <SignInsCard />}
+            {may("orders") && <OrdersTodayCard />}
+            {may("cash-outs") && <CashOutsChart />}
+          </div>
+        </div>
       </section>
     </>
   );

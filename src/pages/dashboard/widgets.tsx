@@ -59,7 +59,7 @@ export function PointsFlowCard() {
 export function QueueCard() {
   const { queue } = overview;
   return (
-    <Card spot="support-queue" icon={<CustomerServiceOutlined />} title="Support queue">
+    <Card className="dash__small" spot="support-queue" icon={<CustomerServiceOutlined />} title="Support queue">
       <Stat value={String(queue.waiting)} unit="in line" aside={{ label: "Avg wait", value: `${queue.averageWaitMinutes} min` }} />
       <div className="queue">
         {queue.names.map((name, i) => (
@@ -77,7 +77,7 @@ export function QueueCard() {
 export function OrdersTodayCard() {
   const { ordersToday } = overview;
   return (
-    <Card spot="orders-today" icon={<ShoppingOutlined />} title="Orders today">
+    <Card className="dash__small" spot="orders-today" icon={<ShoppingOutlined />} title="Orders today">
       <Stat value={String(ordersToday.count)} unit="orders" aside={{ label: "Sales", value: pesos(ordersToday.pesos) }} />
     </Card>
   );
@@ -86,7 +86,7 @@ export function OrdersTodayCard() {
 /** One dot per day for eight weeks; the darker, the more members signed in. */
 export function SignInsCard() {
   return (
-    <Card className="dash__dots" spot="sign-ins" icon={<TeamOutlined />} title="Sign-ins">
+    <Card className="dash__small" spot="sign-ins" icon={<TeamOutlined />} title="Sign-ins">
       <Stat value={String(signInLevels.filter((l) => l >= 2).length)} unit="busy days" chip="+8%" />
       <div className="dots">
         {signInLevels.map((level, i) => <i className="dot" data-level={level} key={i} />)}
