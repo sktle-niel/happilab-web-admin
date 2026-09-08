@@ -23,6 +23,7 @@ export function CashOutsChart() {
   return (
     <Card
       className="dash__chart"
+      spot="cash-outs-chart"
       dark
       icon={<BankOutlined />}
       title="Cash-outs"

@@ -14,7 +14,7 @@ export function SupportPage() {
     <>
       <PageHead title="Support" subtitle="Members waiting for a person, and the agents on the desk." />
       <div className="settings-grid stagger">
-        <Card icon={<CustomerServiceOutlined />} title="In line">
+        <Card spot="in-line" icon={<CustomerServiceOutlined />} title="In line">
           <Stat value={String(queue.waiting)} unit="waiting" aside={{ label: "Avg wait", value: `${queue.averageWaitMinutes} min` }} />
           <List
             dataSource={queue.names}
@@ -25,7 +25,7 @@ export function SupportPage() {
             )}
           />
         </Card>
-        <Card icon={<TeamOutlined />} title="On the desk">
+        <Card spot="on-the-desk" icon={<TeamOutlined />} title="On the desk">
           <Stat value={String(agents.length)} unit="agents online" />
           <List
             dataSource={agents}

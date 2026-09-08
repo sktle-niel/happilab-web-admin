@@ -3,6 +3,7 @@ import { useTable } from "@refinedev/antd";
 import { Button, Table } from "antd";
 import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
+import { Spot } from "../../components/Spot";
 import { StatusTag } from "../../components/StatusTag";
 import type { Staff } from "../../data/fake/people";
 import { dayLabel, initials } from "../../lib/format";
@@ -15,7 +16,7 @@ export function StaffList() {
     <ListCard
       title="Staff"
       subtitle="Who runs the programme, and what each of them may touch."
-      aside={<Button type="primary" icon={<PlusOutlined />} onClick={() => toast("Inviting staff lands with the API.")}>Add staff</Button>}
+      aside={<Spot id="add-staff" inline><Button type="primary" icon={<PlusOutlined />} onClick={() => toast("Inviting staff lands with the API.")}>Add staff</Button></Spot>}
     >
       <Table<Staff> {...tableProps} rowKey="id" pagination={false}>
         <Table.Column<Staff> title="Account" dataIndex="name" render={(_, s) => (

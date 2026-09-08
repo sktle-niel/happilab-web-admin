@@ -43,7 +43,7 @@ export function GlobalSearch() {
       event.preventDefault();
       setActive((i) => Math.max(i - 1, 0));
     } else if (event.key === "Enter") {
-      const to = flat[active]?.to ?? groups[0]?.to;
+      const to = flat[active]?.to ?? flat[0]?.to;
       if (to) go(to);
     } else if (event.key === "Escape") {
       setOpen(false);
@@ -79,7 +79,7 @@ export function GlobalSearch() {
             <div key={group.label} className="search-panel__group">
               <div className="search-panel__label">
                 {group.label}
-                <button type="button" onClick={() => go(group.to)}>See all</button>
+                {group.to && <button type="button" onClick={() => go(group.to!)}>See all</button>}
               </div>
               {group.hits.map((hit) => {
                 const index = flat.indexOf(hit);

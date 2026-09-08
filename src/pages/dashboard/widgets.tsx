@@ -7,13 +7,13 @@ export function StatCards() {
   const { pointsIssued, pending, activeMembers } = overview;
   return (
     <>
-      <Card className="dash__stat" icon={<ThunderboltOutlined />} title="Points issued">
+      <Card className="dash__stat" spot="points-issued" icon={<ThunderboltOutlined />} title="Points issued">
         <Stat value={compact(pointsIssued.value)} unit="pts this month" chip={`+${pointsIssued.deltaPercent}%`} />
       </Card>
-      <Card className="dash__stat" icon={<WalletOutlined />} title="Cash-outs pending">
+      <Card className="dash__stat" spot="cash-outs-pending" icon={<WalletOutlined />} title="Cash-outs pending">
         <Stat value={String(pending.count)} unit="requests" aside={{ label: "Waiting", value: pesos(pending.pesos) }} />
       </Card>
-      <Card className="dash__stat" icon={<TeamOutlined />} title="Active members">
+      <Card className="dash__stat" spot="active-members" icon={<TeamOutlined />} title="Active members">
         <Stat value={thousands(activeMembers.value)} unit="members" chip={`+${activeMembers.deltaPercent}%`} />
       </Card>
     </>
@@ -24,7 +24,7 @@ export function StatCards() {
 export function PointsFlowCard() {
   const { flow, stages } = overview;
   return (
-    <Card className="dash__flow" icon={<SwapOutlined />} title="Points flow">
+    <Card className="dash__flow" spot="points-flow" icon={<SwapOutlined />} title="Points flow">
       <Stat value={compact(flow.earned)} unit="pts earned" chip={`+${Math.round(((flow.earned - flow.cashedOut) / flow.earned) * 100)}%`} />
       <div className="bubbles">
         <div className="bubble bubble--lavender"><b>{compact(flow.earned)}</b><small>earned</small></div>
@@ -49,7 +49,7 @@ export function PointsFlowCard() {
 export function QueueCard() {
   const { queue } = overview;
   return (
-    <Card icon={<CustomerServiceOutlined />} title="Support queue">
+    <Card spot="support-queue" icon={<CustomerServiceOutlined />} title="Support queue">
       <Stat value={String(queue.waiting)} unit="in line" aside={{ label: "Avg wait", value: `${queue.averageWaitMinutes} min` }} />
       <div className="queue">
         {queue.names.map((name, i) => (
@@ -67,7 +67,7 @@ export function QueueCard() {
 export function OrdersTodayCard() {
   const { ordersToday } = overview;
   return (
-    <Card icon={<ShoppingOutlined />} title="Orders today">
+    <Card spot="orders-today" icon={<ShoppingOutlined />} title="Orders today">
       <Stat value={String(ordersToday.count)} unit="orders" aside={{ label: "Sales", value: pesos(ordersToday.pesos) }} />
     </Card>
   );
@@ -76,7 +76,7 @@ export function OrdersTodayCard() {
 /** One dot per day for eight weeks; the darker, the more members signed in. */
 export function SignInsCard() {
   return (
-    <Card className="dash__dots" icon={<TeamOutlined />} title="Sign-ins">
+    <Card className="dash__dots" spot="sign-ins" icon={<TeamOutlined />} title="Sign-ins">
       <Stat value={String(signInLevels.filter((l) => l >= 2).length)} unit="busy days" chip="+8%" />
       <div className="dots">
         {signInLevels.map((level, i) => <i className="dot" data-level={level} key={i} />)}

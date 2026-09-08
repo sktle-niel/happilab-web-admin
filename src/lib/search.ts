@@ -1,20 +1,25 @@
 import { products } from "../data/fake/catalogue";
 import { cashOuts, orders } from "../data/fake/money";
 import { members } from "../data/fake/people";
+import { findDestinations } from "./destinations";
 
 export type Hit = { key: string; title: string; subtitle: string; to: string };
-export type HitGroup = { label: string; to: string; hits: Hit[] };
+export type HitGroup = { label: string; to?: string; hits: Hit[] };
 
 const LIMIT = 4;
 const has = (q: string, ...fields: (string | null | undefined)[]) => fields.some((field) => field?.toLowerCase().includes(q));
 const listWith = (path: string, term: string) => `${path}?q=${encodeURIComponent(term)}`;
 
-/** Everything the top bar can find, grouped, a few per group; the whole list is one click away. */
+/** Everything the top bar can find: places first, then records, a few per group. */
 export function searchAll(query: string): HitGroup[] {
   const term = query.trim();
   const q = term.toLowerCase();
   if (q.length < 2) return [];
   const groups: HitGroup[] = [
+    {
+      label: "Pages",
+      hits: findDestinations(term).map((d) => ({ key: d.to, title: d.title, subtitle: d.crumb, to: d.to })),
+    },
     {
       label: "Members",
       to: listWith("/members", term),

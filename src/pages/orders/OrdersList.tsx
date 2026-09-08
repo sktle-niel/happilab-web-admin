@@ -3,6 +3,7 @@ import { useTable } from "@refinedev/antd";
 import { Button, Input, Table } from "antd";
 import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
+import { Spot } from "../../components/Spot";
 import { StatusTag } from "../../components/StatusTag";
 import type { Order } from "../../data/fake/money";
 import { dayLabel, pesos } from "../../lib/format";
@@ -18,7 +19,7 @@ export function OrdersList() {
       title="Orders"
       subtitle="Every order recorded from the stores, and the points it earned the referrer."
       toolbar={<Input.Search key={q} allowClear defaultValue={q} placeholder="Search reference or buyer" onSearch={search} />}
-      aside={<Button type="primary" icon={<PlusOutlined />} onClick={() => toast("Recording orders lands with the API.")}>Record order</Button>}
+      aside={<Spot id="record-order" inline><Button type="primary" icon={<PlusOutlined />} onClick={() => toast("Recording orders lands with the API.")}>Record order</Button></Spot>}
     >
       <Table<Order> {...tableProps} rowKey="id">
         <Table.Column<Order> title="Reference" dataIndex="externalReference" render={(v: string) => <span className="cell-primary">{v}</span>} />

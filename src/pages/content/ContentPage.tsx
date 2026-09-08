@@ -2,7 +2,9 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useTable } from "@refinedev/antd";
 import { Button, Table, Tabs } from "antd";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router";
 import { ListCard } from "../../components/ListCard";
+import { Spot } from "../../components/Spot";
 import { StatusTag } from "../../components/StatusTag";
 import type { Faq, Post } from "../../data/fake/catalogue";
 import { dayLabel } from "../../lib/format";
@@ -34,6 +36,8 @@ function Faqs() {
 }
 
 export function ContentPage() {
+  const [params] = useSearchParams();
+  const tab = params.get("tab") ?? "posts";
   return (
     <ListCard
       title="Content"
@@ -41,11 +45,13 @@ export function ContentPage() {
       aside={<Button type="primary" icon={<PlusOutlined />} onClick={() => toast("Writing posts lands with the API.")}>New post</Button>}
     >
       <Tabs
+        key={tab}
+        defaultActiveKey={tab}
         style={{ padding: "0 12px" }}
         items={[
-          { key: "posts", label: "Feed posts", children: <Posts /> },
-          { key: "faqs", label: "FAQs", children: <Faqs /> },
-          { key: "terms", label: "Terms", children: <p className="cell-muted" style={{ padding: 12 }}>Terms sections are edited in Settings once the API is connected.</p> },
+          { key: "posts", label: "Feed posts", children: <Spot id="posts"><Posts /></Spot> },
+          { key: "faqs", label: "FAQs", children: <Spot id="faqs"><Faqs /></Spot> },
+          { key: "terms", label: "Terms", children: <Spot id="terms"><p className="cell-muted" style={{ padding: 12 }}>Terms sections are edited in Settings once the API is connected.</p></Spot> },
         ]}
       />
     </ListCard>

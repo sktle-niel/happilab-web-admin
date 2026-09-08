@@ -3,6 +3,7 @@ import { useTable } from "@refinedev/antd";
 import { Button, Switch, Table } from "antd";
 import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
+import { Spot } from "../../components/Spot";
 import type { Product } from "../../data/fake/catalogue";
 import { pesos } from "../../lib/format";
 
@@ -15,7 +16,7 @@ export function ProductsList() {
     <ListCard
       title="Products"
       subtitle="The catalogue members share, in the order the app shows it."
-      aside={<Button type="primary" icon={<PlusOutlined />} onClick={notYet}>Add product</Button>}
+      aside={<Spot id="add-product" inline><Button type="primary" icon={<PlusOutlined />} onClick={notYet}>Add product</Button></Spot>}
     >
       <Table<Product> {...tableProps} rowKey="id" pagination={false}>
         <Table.Column<Product> title="Product" dataIndex="name" render={(_, p) => (

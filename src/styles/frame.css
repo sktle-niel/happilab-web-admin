@@ -118,3 +118,11 @@ button { font: inherit; }
 .who__name, .who__email { display: block; }
 .date-pill:active, .bell:active { transform: scale(0.97); }
 .bell, .date-pill { transition: transform 160ms var(--ease-out); }
+
+/* The search's landing light: a lime ring and a green label, held four seconds, then gone. */
+[data-spot] { transition: box-shadow 200ms var(--ease-out), background-color 200ms var(--ease-out); }
+.spot { border-radius: 10px; padding: 4px 8px; margin: -4px -8px; }
+.spot--inline { display: inline-block; padding: 4px; margin: -4px; }
+.is-spotlit { box-shadow: 0 0 0 2px var(--lime), 0 0 0 8px rgba(214, 242, 106, 0.3) !important; background-color: rgba(214, 242, 106, 0.16); }
+.card--dark.is-spotlit { background-color: var(--ink); }
+.is-spotlit .card__title, .is-spotlit .ant-form-item-label > label, .is-spotlit > h3, .is-spotlit .ant-tabs-tab-active .ant-tabs-tab-btn { color: #4f7a00 !important; }

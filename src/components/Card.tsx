@@ -10,6 +10,8 @@ type CardProps = {
   dark?: boolean;
   className?: string;
   action?: ReactNode;
+  /** The id the search lands on, as `data-spot`. */
+  spot?: string;
 };
 
 /** The card's own menu: the two things every figure on the dashboard can do. */
@@ -34,9 +36,9 @@ function CardMenu({ title }: { title: string }) {
 }
 
 /** The dashboard's card: an icon in a circle, a title, a menu or an action, then whatever it holds. */
-export function Card({ title, icon, children, dark = false, className = "", action }: CardProps) {
+export function Card({ title, icon, children, dark = false, className = "", action, spot }: CardProps) {
   return (
-    <article className={`card ${dark ? "card--dark" : ""} ${className}`.trim()}>
+    <article className={`card ${dark ? "card--dark" : ""} ${className}`.trim()} data-spot={spot}>
       <header className="card__head">
         <span className="card__icon">{icon}</span>
         <span className="card__title">{title}</span>
