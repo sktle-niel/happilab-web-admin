@@ -17,7 +17,7 @@ export function Dashboard() {
           </div>
         }
       />
-      <section className="dash">
+      <section className="dash stagger">
         <StatCards />
         <PointsFlowCard />
         <div className="dash__side">

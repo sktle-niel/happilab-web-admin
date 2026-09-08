@@ -27,7 +27,7 @@ export function SettingsPage() {
   return (
     <>
       <PageHead title="Settings" subtitle="What the app says, shows and promises. Every change reaches members on their next launch." />
-      <div className="settings-grid">
+      <div className="settings-grid stagger">
         <SettingsCard title="Brand">
           <Form layout="vertical" initialValues={DEFAULTS.brand} onFinish={save("Brand")} requiredMark={false}>
             <Form.Item name="name" label="App name" rules={[{ required: true, min: 2, max: 40 }]}><Input /></Form.Item>

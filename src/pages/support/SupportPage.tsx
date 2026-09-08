@@ -13,7 +13,7 @@ export function SupportPage() {
   return (
     <>
       <PageHead title="Support" subtitle="Members waiting for a person, and the agents on the desk." />
-      <div className="settings-grid">
+      <div className="settings-grid stagger">
         <Card icon={<CustomerServiceOutlined />} title="In line">
           <Stat value={String(queue.waiting)} unit="waiting" aside={{ label: "Avg wait", value: `${queue.averageWaitMinutes} min` }} />
           <List
