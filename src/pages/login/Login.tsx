@@ -1,13 +1,12 @@
 import { Button, Form, Input } from "antd";
 import { useEffect } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { takeExpiredFlag } from "../../providers/fakeAuthProvider";
 import { useStaffSession } from "../../providers/session";
 import { Field, LoginShell } from "./LoginShell";
 
 type Credentials = { email: string; password: string };
-
-const soon = (what: string) => () => toast(`${what} lands with the API.`);
 
 /** Step one of two: who you are. A code follows either way. */
 export function Login() {
@@ -40,7 +39,7 @@ export function Login() {
           </Form.Item>
         </Field>
         <div className="login__row login__row--end">
-          <button type="button" className="login__link" onClick={soon("Password reset")}>Forgot password?</button>
+          <Link to="/login/forgot" className="login__link">Forgot password?</Link>
         </div>
         <Button type="primary" htmlType="submit" block loading={isBusy} className="login__submit">Continue</Button>
       </Form>

@@ -9,6 +9,8 @@ import { CashOutsList } from "./pages/cashouts/CashOutsList";
 import { ContentPage } from "./pages/content/ContentPage";
 import { Dashboard } from "./pages/dashboard/Dashboard";
 import { Login } from "./pages/login/Login";
+import { Forgot } from "./pages/login/Forgot";
+import { Reset } from "./pages/login/Reset";
 import { Verify } from "./pages/login/Verify";
 import { MembersList } from "./pages/members/MembersList";
 import { OrdersList } from "./pages/orders/OrdersList";
@@ -84,6 +86,8 @@ export function App() {
               >
                 <Route path="/login" element={<Login />} />
                 <Route path="/login/verify" element={<Verify />} />
+                <Route path="/login/forgot" element={<Forgot />} />
+                <Route path="/login/reset" element={<Reset />} />
               </Route>
             </Routes>
           </Refine>

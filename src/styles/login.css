@@ -69,3 +69,11 @@
 .otp__caret { display: block; width: 1.5px; height: 24px; background: var(--text); animation: caret-blink 1s steps(2) infinite; }
 @keyframes caret-blink { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .otp__caret { animation: none; } }
+
+/* The password rules, ticking off as they are met. */
+.rules { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 2px 0 14px; text-align: left; }
+.rules__item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); background: var(--field); border-radius: 999px; padding: 4px 10px 4px 6px; transition: background-color 120ms ease, color 120ms ease; }
+.rules__item.is-met { background: #eaf6d2; color: var(--green-text); }
+.rules__mark { width: 16px; height: 16px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-size: 9px; color: var(--green-text); flex: none; }
+.login__lead--tight { margin-bottom: 14px; }
+.login__stack { display: grid; gap: 10px; }

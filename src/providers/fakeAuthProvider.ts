@@ -1,4 +1,5 @@
 import type { AuthProvider } from "@refinedev/core";
+import { passwordMeetsPolicy } from "../lib/password";
 import type { StaffIdentity } from "./session";
 
 /**
@@ -10,9 +11,11 @@ import type { StaffIdentity } from "./session";
 const SESSION = "happilab-admin.session";
 const CHALLENGE = "happilab-admin.challenge";
 const EXPIRED = "happilab-admin.expired";
+const RESET = "happilab-admin.reset";
 
 export const IDLE_DAYS = 7;
 export const FAKE_CODE = "123456";
+export const FAKE_RESET_TOKEN = "bundled-reset-token";
 const IDLE_MS = IDLE_DAYS * 86_400_000;
 const GOOGLE_ACCOUNT = "niel@falconcrest.ph";
 
@@ -95,6 +98,23 @@ export const fakeAuthProvider: AuthProvider = {
   getIdentity: async (): Promise<StaffIdentity | null> => {
     const session = read<Session>(localStorage, SESSION);
     return session ? { id: "s001", name: "Niel Ladica", email: session.email, role: "owner" } : null;
+  },
+
+  /** The link would go to the email; on bundled data the page shows it. */
+  forgotPassword: async ({ email }: { email?: unknown }) => {
+    if (typeof email !== "string" || !email.includes("@")) return failed("Enter your work email.");
+    sessionStorage.setItem(RESET, JSON.stringify({ email: email.trim().toLowerCase(), token: FAKE_RESET_TOKEN }));
+    return { success: true, redirectTo: "/login/forgot?sent=1" };
+  },
+
+  updatePassword: async ({ password, confirmPassword, token }: { password?: unknown; confirmPassword?: unknown; token?: unknown }) => {
+    const pending = read<{ email: string; token: string }>(sessionStorage, RESET);
+    if (!pending || token !== pending.token) return failed("This link has expired. Request a new one.");
+    if (typeof password !== "string" || !passwordMeetsPolicy(password)) return failed("Twelve characters, a capital, a number and a symbol.");
+    if (password !== confirmPassword) return failed("The two passwords do not match.");
+    sessionStorage.removeItem(RESET);
+    localStorage.removeItem(SESSION);
+    return { success: true, redirectTo: "/login", successNotification: { message: "Password changed", description: "Sign in with it, and a code will follow." } };
   },
 
   onError: async (error) => ({ error }),
