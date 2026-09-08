@@ -2,37 +2,100 @@ import type { AuthProvider } from "@refinedev/core";
 import type { StaffIdentity } from "./session";
 
 /**
- * Lets any email with a 12-character password in and remembers it for
- * the browser — the stand-in until the API issues staff tokens. Nothing
- * here is a credential; the API implementation replaces this file.
+ * The stand-in for the API's staff sign-in: two steps, a code on every
+ * sign-in whichever way it started, a session that lasts until sign-out
+ * or seven days without a visit. Nothing here is a credential; the API
+ * implementation replaces this file and keeps the same shape.
  */
-const KEY = "happilab-admin.session";
+const SESSION = "happilab-admin.session";
+const CHALLENGE = "happilab-admin.challenge";
+const EXPIRED = "happilab-admin.expired";
 
-const remembered = (): { email: string } | null => {
+export const IDLE_DAYS = 7;
+export const FAKE_CODE = "123456";
+const IDLE_MS = IDLE_DAYS * 86_400_000;
+const GOOGLE_ACCOUNT = "niel@falconcrest.ph";
+
+export type LoginParams =
+  | { method: "password"; email: string; password: string }
+  | { method: "google" }
+  | { method: "otp"; code: string };
+
+export type Challenge = { email: string; method: "password" | "google"; sentAt: number };
+type Session = { email: string; lastSeen: number };
+
+function read<T>(store: Storage, key: string): T | null {
   try {
-    const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as { email: string }) : null;
+    const raw = store.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
   } catch {
     return null;
   }
+}
+
+/** The sign-in waiting for its code, if any. */
+export const readChallenge = () => read<Challenge>(sessionStorage, CHALLENGE);
+
+export function resendCode(): void {
+  const pending = readChallenge();
+  if (pending) sessionStorage.setItem(CHALLENGE, JSON.stringify({ ...pending, sentAt: Date.now() }));
+}
+
+/** True once, right after a session ended for staying away too long. */
+export function takeExpiredFlag(): boolean {
+  const was = sessionStorage.getItem(EXPIRED) === "1";
+  sessionStorage.removeItem(EXPIRED);
+  return was;
+}
+
+const failed = (message: string) => ({ success: false, error: { name: "Sign in failed", message } });
+
+const challenge = (email: string, method: Challenge["method"]) => {
+  sessionStorage.setItem(CHALLENGE, JSON.stringify({ email, method, sentAt: Date.now() } satisfies Challenge));
+  return { success: true, redirectTo: "/login/verify" };
 };
 
 export const fakeAuthProvider: AuthProvider = {
-  login: async ({ email, password }: { email?: unknown; password?: unknown }) => {
-    if (typeof email !== "string" || typeof password !== "string" || password.length < 12) {
-      return { success: false, error: { name: "Sign in failed", message: "Check the email and password." } };
+  login: async (params: LoginParams) => {
+    switch (params.method) {
+      case "google":
+        return challenge(GOOGLE_ACCOUNT, "google");
+      case "password":
+        if (!params.email.includes("@") || params.password.length < 12) return failed("Check the email and password.");
+        return challenge(params.email.trim().toLowerCase(), "password");
+      case "otp": {
+        const pending = readChallenge();
+        if (!pending) return failed("Start again from the sign-in page.");
+        if (params.code !== FAKE_CODE) return failed("That code is not right.");
+        sessionStorage.removeItem(CHALLENGE);
+        localStorage.setItem(SESSION, JSON.stringify({ email: pending.email, lastSeen: Date.now() } satisfies Session));
+        return { success: true, redirectTo: "/" };
+      }
     }
-    localStorage.setItem(KEY, JSON.stringify({ email }));
-    return { success: true, redirectTo: "/" };
   },
+
   logout: async () => {
-    localStorage.removeItem(KEY);
+    localStorage.removeItem(SESSION);
     return { success: true, redirectTo: "/login" };
   },
-  check: async () => (remembered() ? { authenticated: true } : { authenticated: false, redirectTo: "/login", logout: true }),
+
+  /** Every visit renews the seven days; a visit after them ends the session instead. */
+  check: async () => {
+    const session = read<Session>(localStorage, SESSION);
+    if (!session) return { authenticated: false, redirectTo: "/login", logout: true };
+    if (Date.now() - session.lastSeen > IDLE_MS) {
+      localStorage.removeItem(SESSION);
+      sessionStorage.setItem(EXPIRED, "1");
+      return { authenticated: false, redirectTo: "/login", logout: true };
+    }
+    localStorage.setItem(SESSION, JSON.stringify({ ...session, lastSeen: Date.now() }));
+    return { authenticated: true };
+  },
+
   getIdentity: async (): Promise<StaffIdentity | null> => {
-    const session = remembered();
+    const session = read<Session>(localStorage, SESSION);
     return session ? { id: "s001", name: "Niel Ladica", email: session.email, role: "owner" } : null;
   },
+
   onError: async (error) => ({ error }),
 };

@@ -9,6 +9,7 @@ import { CashOutsList } from "./pages/cashouts/CashOutsList";
 import { ContentPage } from "./pages/content/ContentPage";
 import { Dashboard } from "./pages/dashboard/Dashboard";
 import { Login } from "./pages/login/Login";
+import { Verify } from "./pages/login/Verify";
 import { MembersList } from "./pages/members/MembersList";
 import { OrdersList } from "./pages/orders/OrdersList";
 import { ProductsList } from "./pages/products/ProductsList";
@@ -17,6 +18,7 @@ import { StaffList } from "./pages/staff/StaffList";
 import { SupportPage } from "./pages/support/SupportPage";
 import { fakeAuthProvider } from "./providers/fakeAuthProvider";
 import { fakeDataProvider } from "./providers/fakeDataProvider";
+import { sonnerNotifications } from "./providers/notifications";
 import { theme } from "./theme";
 
 /** Every resource the admin manages; the paths match the sidebar. */
@@ -49,6 +51,7 @@ export function App() {
           <Refine
             dataProvider={fakeDataProvider}
             authProvider={fakeAuthProvider}
+            notificationProvider={sonnerNotifications}
             routerProvider={routerProvider}
             resources={RESOURCES}
             options={{ syncWithLocation: false, warnWhenUnsavedChanges: false, disableTelemetry: true }}
@@ -80,6 +83,7 @@ export function App() {
                 }
               >
                 <Route path="/login" element={<Login />} />
+                <Route path="/login/verify" element={<Verify />} />
               </Route>
             </Routes>
           </Refine>

@@ -58,3 +58,14 @@
 .peek__avatars i:first-child { margin-left: 0; }
 @keyframes peek-drift { from { transform: translateY(0); } to { transform: translateY(-6px); } }
 @media (prefers-reduced-motion: reduce) { .peek { animation: none; } }
+
+/* The code step. */
+.login__row--end { justify-content: flex-end; }
+.login__lead b { color: var(--text); font-weight: 600; }
+.login__social:disabled { opacity: 0.6; cursor: default; }
+.otp { display: flex; gap: 10px; justify-content: center; margin: 4px 0 18px; }
+.otp__slot { position: relative; width: 48px; height: 56px; border-radius: 12px; background: var(--field); display: grid; place-items: center; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; transition: box-shadow 120ms ease, background-color 120ms ease; }
+.otp__slot.is-active { background: #fff; box-shadow: 0 0 0 2px var(--green); }
+.otp__caret { display: block; width: 1.5px; height: 24px; background: var(--text); animation: caret-blink 1s steps(2) infinite; }
+@keyframes caret-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .otp__caret { animation: none; } }
