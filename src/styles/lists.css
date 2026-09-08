@@ -1,0 +1,14 @@
+/* Lists sit in one card each; the table inside inherits the theme. */
+.list-card { padding: 8px 8px 12px; }
+.list-card .ant-table { background: transparent; }
+.list-card .ant-table-thead > tr > th { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+.list-card .ant-pagination { padding: 0 12px; }
+.list-toolbar { display: flex; gap: 10px; align-items: center; padding: 12px 12px 6px; flex-wrap: wrap; }
+.list-toolbar .ant-input-affix-wrapper { width: 280px; }
+.list-toolbar__spacer { flex: 1; }
+.cell-primary { font-weight: 700; }
+.cell-muted { color: var(--text-2); font-size: 12px; }
+.cell-thumb { width: 40px; height: 40px; border-radius: 12px; object-fit: cover; margin-right: 12px; vertical-align: middle; }
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
+.settings-grid .card h3 { margin: 0 0 14px; font-size: 15px; }

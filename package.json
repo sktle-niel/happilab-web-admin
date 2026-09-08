@@ -1,0 +1,36 @@
+{
+  "name": "happilab-admin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Admin website for the AC Falcon Crest referral app",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^6.3.4",
+    "@refinedev/antd": "^6.0.3",
+    "@refinedev/core": "^5.0.12",
+    "@refinedev/react-router": "^2.0.4",
+    "@tanstack/react-query": "^5.102.8",
+    "antd": "^5.29.3",
+    "dayjs": "^1.11.23",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router": "^7.18.3",
+    "recharts": "^3.10.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2"
+  }
+}
