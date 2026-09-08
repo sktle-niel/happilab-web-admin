@@ -34,7 +34,7 @@ button { font: inherit; }
 
 .sidebar { position: sticky; top: 0; height: 100vh; background: var(--ink); color: #fff; padding: 22px 14px 18px; display: flex; flex-direction: column; gap: 4px; }
 .sidebar__brand { display: flex; align-items: center; gap: 10px; padding: 4px 10px 22px; font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
-.sidebar__brand img { width: 28px; height: 28px; border-radius: 8px; object-fit: cover; }
+.sidebar__brand img { width: 30px; height: 30px; object-fit: contain; }
 .nav__item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--r-control); color: #c9c9c5; text-decoration: none; font-weight: 500; font-size: 13.5px; }
 .nav__item.is-active { background: #fff; color: var(--ink); font-weight: 600; }
 .nav__icon { display: grid; place-items: center; width: 18px; font-size: 16px; }

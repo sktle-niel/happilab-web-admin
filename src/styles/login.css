@@ -1,8 +1,34 @@
-.login { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
-.login__card { width: min(400px, 100%); background: var(--paper); border-radius: var(--r-card); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.05); padding: 32px 30px 26px; }
-.login__brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; margin-bottom: 24px; }
-.login__brand img { width: 30px; height: 30px; border-radius: 9px; object-fit: cover; }
-.login__card h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.02em; font-weight: 700; }
-.login__card p { margin: 0 0 22px; color: var(--text-2); font-size: 13.5px; }
-.login__submit { width: 100%; height: 42px; }
-.login__note { margin-top: 16px; font-size: 12px; color: var(--muted); text-align: center; }
+.login { --green: #2f6108; --green-deep: #173d05; --green-text: #3f7d0a; --field: #f4f6f1; min-height: 100vh; display: grid; grid-template-columns: minmax(360px, 480px) minmax(0, 1fr); gap: 40px; padding: 24px; background: #fff; max-width: 1240px; margin: 0 auto; }
+.login__form { align-self: center; padding: 24px 8px 24px 32px; }
+.login__brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 20px; letter-spacing: -0.01em; margin-bottom: 36px; }
+.login__brand img { width: 52px; height: 52px; object-fit: contain; }
+.login h1 { font-size: 32px; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 6px; line-height: 1.1; }
+.login__lead { margin: 0 0 28px; color: var(--text-2); font-size: 14px; }
+
+.field { display: block; background: var(--field); border-radius: 12px; padding: 9px 14px 7px; margin-bottom: 12px; box-shadow: 0 0 0 1px transparent; transition: box-shadow 120ms ease, background-color 120ms ease; cursor: text; }
+.field:focus-within { background: #fff; box-shadow: 0 0 0 2px var(--green); }
+.field__label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.01em; margin-bottom: 1px; }
+.field .ant-input, .field .ant-input-affix-wrapper { padding: 2px 0 !important; font-size: 14px; background: transparent !important; }
+.field .ant-input-affix-wrapper .ant-input { padding: 0 !important; }
+.field .ant-form-item-explain-error { font-size: 12px; margin-top: 4px; }
+
+.login__row { display: flex; align-items: center; justify-content: space-between; margin: 6px 2px 18px; font-size: 13px; }
+.login__link { border: 0; background: none; padding: 0; color: var(--green-text); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.login__submit { height: 46px; font-weight: 700; }
+.login__note { margin: 18px 0 0; text-align: center; font-size: 13px; color: var(--text-2); }
+.login__note span { color: var(--green-text); font-weight: 600; }
+
+/* The app's own illustration, screened onto a deep green so its black ground becomes the panel. */
+.login__hero { position: relative; overflow: hidden; border-radius: 32px; background: linear-gradient(160deg, var(--green) 0%, var(--green-deep) 100%); min-height: calc(100vh - 48px); }
+.login__hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; mix-blend-mode: screen; opacity: 0.95; }
+.login__tagline { position: absolute; top: 32px; right: 36px; margin: 0; max-width: 360px; text-align: right; color: #fff; font-size: 18px; font-weight: 600; line-height: 1.35; letter-spacing: -0.01em; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35); }
+
+@media (max-width: 900px) {
+  .login { grid-template-columns: 1fr; gap: 20px; padding: 16px; }
+  .login__form { padding: 8px 4px; order: 2; }
+  .login__hero { order: 1; min-height: 200px; border-radius: 24px; }
+  .login__tagline { top: 20px; right: 20px; font-size: 15px; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .login__hero img { mix-blend-mode: normal; opacity: 1; }
+}

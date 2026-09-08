@@ -6,7 +6,7 @@ export function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
-        <img src="/brand.jpg" alt="" />
+        <img src="/brand-mark.png" alt="" />
         Falcon Crest
       </div>
       <nav>
