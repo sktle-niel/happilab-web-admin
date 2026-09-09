@@ -23,7 +23,6 @@ export const DESTINATIONS: Destination[] = [
   { title: "Products", crumb: "Page", to: "/products", keywords: "catalogue price badge stores live" },
   { title: "Add product", crumb: "Products", to: "/products/new", keywords: "new product" },
   { title: "Orders", crumb: "Page", to: "/orders", keywords: "sales references buyers" },
-  { title: "Record order", crumb: "Orders", to: "/orders#record-order", keywords: "new order add" },
   { title: "Cash-outs", crumb: "Page", to: "/cash-outs", keywords: "requests approve review processing sent failed gcash maya payout" },
   { title: "Content", crumb: "Page", to: "/content", keywords: "feed posts faqs terms copy" },
   { title: "Feed posts", crumb: "Content", to: "/content?tab=posts#posts", keywords: "news feed" },
@@ -78,6 +77,5 @@ export function findDestinations(query: string, limit = 6): Destination[] {
 export type QuickAction = { label: string; to: string; key: string; page: PageKey };
 export const QUICK_ACTIONS: QuickAction[] = [
   { label: "Add product", to: "/products/new", key: "P", page: "products" },
-  { label: "Record order", to: "/orders#record-order", key: "O", page: "orders" },
   { label: "Add staff", to: "/staff#add-staff", key: "S", page: "staff" },
 ];

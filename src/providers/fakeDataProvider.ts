@@ -1,7 +1,7 @@
 import type { CrudFilter, CrudSort, DataProvider } from "@refinedev/core";
 import { logAudit, verbFor } from "../data/fake/audit";
 import { faqs, posts, products, terms } from "../data/fake/catalogue";
-import { afterCreate, afterUpdate } from "../data/fake/effects";
+import { afterUpdate } from "../data/fake/effects";
 import { audit, cashOuts, orders } from "../data/fake/money";
 import { members, staff } from "../data/fake/people";
 import { tickets } from "../data/fake/tickets";
@@ -88,7 +88,6 @@ export const fakeDataProvider: DataProvider = {
   create: async ({ resource, variables }) => {
     const row = { id: `${resource.slice(0, 1)}${Date.now()}`, ...(variables as object) } as Row;
     rows(resource).unshift(row);
-    afterCreate(resource, row);
     logAudit(resource, "created", row);
     return { data: row as never };
   },
