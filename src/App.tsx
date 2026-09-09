@@ -93,6 +93,7 @@ export function App() {
               ))}
               <Route path="/products/new" element={guarded("products", <ProductEditor />)} />
               <Route path="/products/:id/edit" element={guarded("products", <ProductEditor />)} />
+              <Route path="/support/tickets/:ticketId" element={guarded("support", <SupportPage />)} />
               <Route path="/support/:id" element={guarded("support", <SupportPage />)} />
             </Route>
             <Route

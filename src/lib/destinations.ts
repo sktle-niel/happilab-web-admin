@@ -32,6 +32,8 @@ export const DESTINATIONS: Destination[] = [
   { title: "Support desk", crumb: "Page", to: "/support", keywords: "queue agents chat" },
   { title: "In line", crumb: "Support", to: "/support#in-line", keywords: "queue waiting" },
   { title: "On the desk", crumb: "Support", to: "/support#on-the-desk", keywords: "agents online" },
+  { title: "Chat history", crumb: "Support", to: "/support?view=history", keywords: "ended resolved past conversations" },
+  { title: "Tickets", crumb: "Support", to: "/support?view=tickets", keywords: "account issues follow up open done" },
   { title: "Staff", crumb: "Page", to: "/staff", keywords: "owner admin support roles accounts" },
   { title: "Add staff", crumb: "Staff", to: "/staff#add-staff", keywords: "invite new account" },
   { title: "Audit log", crumb: "Page", to: "/audit", keywords: "actions history who did what" },

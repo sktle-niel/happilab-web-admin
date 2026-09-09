@@ -4,6 +4,7 @@ import { faqs, posts, products, terms } from "../data/fake/catalogue";
 import { afterCreate, afterUpdate } from "../data/fake/effects";
 import { audit, cashOuts, orders } from "../data/fake/money";
 import { members, staff } from "../data/fake/people";
+import { tickets } from "../data/fake/tickets";
 
 /**
  * Refine's data contract over the bundled tables: paging, sorting and the
@@ -13,7 +14,7 @@ import { members, staff } from "../data/fake/people";
  */
 type Row = { id: string } & Record<string, unknown>;
 
-const tables: Record<string, Row[]> = { members, products, orders, "cash-outs": cashOuts, posts, faqs, terms, staff, audit };
+const tables: Record<string, Row[]> = { members, products, orders, "cash-outs": cashOuts, posts, faqs, terms, staff, audit, tickets };
 
 /** Resources the API deletes softly: the row stays, stamped `deletedAt`, and a PATCH can bring it back. */
 const SOFT_DELETE = new Set(["products"]);

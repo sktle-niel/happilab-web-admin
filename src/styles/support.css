@@ -39,3 +39,25 @@
 @media (max-width: 1000px) {
   .chat { grid-template-columns: 1fr; }
 }
+
+/* History and tickets share the list: a search or a pile switch on top, tags under each row. */
+.chat-list__search { padding: 4px 4px 8px; }
+.chat-list__search .list-search { width: 100%; }
+.chat-row__tags { display: flex; gap: 6px; align-items: center; margin-top: 4px; min-width: 0; }
+.chat-row__tags .ant-tag { margin: 0; }
+.chat-row__tags small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-pane__actions { flex: none; }
+.chat-pane__tickets { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+.chat-pane__tickets .ant-tag { margin: 0; }
+.chat-pane__tickets a.chip { text-decoration: none; }
+
+/* A ticket: its standing, the member's words, then the notes as a short timeline. */
+.ticket-pane__body { flex: 1; overflow: auto; padding: 18px; display: grid; gap: 14px; align-content: start; }
+.ticket-pane__meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; color: var(--text-2); font-size: 12.5px; }
+.ticket-pane__meta .ant-tag { margin: 0; }
+.ticket-pane__meta a.chip { text-decoration: none; }
+.ticket-pane__details { margin: 0; font-size: 13.5px; line-height: 1.5; background: var(--canvas); border-radius: 12px; padding: 12px 14px; }
+.notes { display: grid; gap: 12px; }
+.note { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; font-size: 13px; }
+.note__meta { color: var(--muted); font-size: 11.5px; margin-left: 6px; }
+.note p { margin: 2px 0 0; line-height: 1.45; }
