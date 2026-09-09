@@ -1,8 +1,8 @@
-import { useCreate, useUpdate } from "@refinedev/core";
 import { Checkbox, Form, Input, Modal, Select } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type { Staff } from "../../data/fake/people";
 import { ALL_PAGES, ROLE_LABELS, ROLE_PRESETS, pageLabel, type PageKey, type StaffRole } from "../../lib/access";
+import { useSaveRecord } from "../../lib/useSaveRecord";
 
 type Values = { name: string; email: string; role: Exclude<StaffRole, "owner">; pages: PageKey[] };
 type Props = { open: boolean; account: Staff | null; onClose: () => void };
@@ -13,9 +13,7 @@ const PAGE_OPTIONS = ALL_PAGES.filter((key) => key !== "dashboard").map((key) =>
 /** One form for a new account and for changing what an existing one may open. */
 export function StaffForm({ open, account, onClose }: Props) {
   const [form] = Form.useForm<Values>();
-  const { mutate: create } = useCreate();
-  const { mutate: update } = useUpdate();
-  const [busy, setBusy] = useState(false);
+  const { save, busy } = useSaveRecord("staff", { created: "Account added", updated: "Access updated" });
 
   useEffect(() => {
     if (!open) return;
@@ -23,17 +21,12 @@ export function StaffForm({ open, account, onClose }: Props) {
   }, [open, account, form]);
 
   /** Picking a role fills the boxes with its preset; the boxes can then be changed by hand. */
-  const applyPreset = (role: Values["role"]) => form.setFieldValue("pages", ROLE_PRESETS[role]);
+  const applyPreset = (role: Values["role"]) => form.setFieldsValue({ pages: ROLE_PRESETS[role] });
 
   const submit = (values: Values) => {
     const pages: PageKey[] = ["dashboard", ...values.pages.filter((key) => key !== "dashboard")];
-    setBusy(true);
-    const done = { onSuccess: onClose, onSettled: () => setBusy(false) };
-    if (account) {
-      update({ resource: "staff", id: account.id, values: { name: values.name, role: values.role, pages }, successNotification: { message: "Access updated", description: `${values.name} can open ${pages.length - 1} pages besides the dashboard.`, type: "success" } }, done);
-    } else {
-      create({ resource: "staff", values: { ...values, pages, status: "active", lastSeenAt: null }, successNotification: { message: "Account added", description: "They can sign in with a code from their email.", type: "success" } }, done);
-    }
+    if (account) save(account.id, { name: values.name, role: values.role, pages }, onClose, `${values.name} can open ${pages.length - 1} pages besides the dashboard.`);
+    else save(null, { ...values, pages, status: "active", lastSeenAt: null }, onClose, "They can sign in with a code from their email.");
   };
 
   return (

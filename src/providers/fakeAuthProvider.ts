@@ -1,4 +1,5 @@
 import type { AuthProvider } from "@refinedev/core";
+import { SESSION_KEY } from "../data/fake/session";
 import { staff } from "../data/fake/people";
 import { ROLE_PRESETS } from "../lib/access";
 import { previewing } from "../lib/env";
@@ -11,7 +12,7 @@ import type { StaffIdentity } from "./session";
  * or seven days without a visit. Nothing here is a credential; the API
  * implementation replaces this file and keeps the same shape.
  */
-const SESSION = "happilab-admin.session";
+const SESSION = SESSION_KEY;
 const CHALLENGE = "happilab-admin.challenge";
 const EXPIRED = "happilab-admin.expired";
 const RESET = "happilab-admin.reset";
