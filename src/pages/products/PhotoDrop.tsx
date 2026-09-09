@@ -1,31 +1,33 @@
 import { CloudUploadOutlined } from "@ant-design/icons";
 import { Upload } from "antd";
-import { useRef } from "react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { uploadFile } from "../../lib/uploads";
 
 const ACCEPT = "image/png,image/jpeg,image/webp";
 
 type Props = { value?: string; onChange?: (url: string) => void };
 
 /**
- * The product photo: drop it or click to browse. On bundled data the file
- * stays in the browser as an object URL; the API build signs an upload,
- * puts the file into storage and keeps the public URL instead. A saved
- * URL is never revoked, only a pick that was replaced before saving.
+ * The product photo: drop it or click to browse. The file goes straight
+ * into storage through a URL the API signs, and the public URL is what
+ * the form keeps; until it lands, the drop zone says so.
  */
 export function PhotoDrop({ value, onChange }: Props) {
-  const picked = useRef<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const pick = (file: File) => {
-    if (picked.current) URL.revokeObjectURL(picked.current);
-    picked.current = URL.createObjectURL(file);
-    onChange?.(picked.current);
+    setBusy(true);
+    uploadFile("product", file)
+      .then((url) => onChange?.(url), (error: Error) => toast.error(error.message))
+      .finally(() => setBusy(false));
     return Upload.LIST_IGNORE;
   };
 
   return (
-    <Upload.Dragger className="photo-drop" accept={ACCEPT} multiple={false} showUploadList={false} beforeUpload={pick}>
+    <Upload.Dragger className="photo-drop" accept={ACCEPT} multiple={false} showUploadList={false} disabled={busy} beforeUpload={pick}>
       <CloudUploadOutlined className="photo-drop__icon" />
-      <span className="upload-btn">{value ? "Replace photo" : "Upload"}</span>
+      <span className="upload-btn">{busy ? "Uploading…" : value ? "Replace photo" : "Upload"}</span>
       <p className="photo-drop__title">Drop the product photo here, or click to browse</p>
       <p className="photo-drop__hint">Square, 800 × 800 or larger. PNG, JPG or WebP.</p>
       {value && (

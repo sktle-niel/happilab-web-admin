@@ -1,11 +1,7 @@
 import { Button, Form, Input } from "antd";
 import { Link, useSearchParams } from "react-router";
-import { backend } from "../../lib/env";
-import { FAKE_RESET_TOKEN } from "../../providers/fakeAuthProvider";
 import { useStaffSession } from "../../providers/session";
 import { Field, LoginShell } from "./LoginShell";
-
-const onBundledData = backend === "fake";
 
 /** Asks for the address, then says the link is on its way. */
 export function Forgot() {
@@ -19,11 +15,6 @@ export function Forgot() {
         <h1>Check your email</h1>
         <p className="login__lead">If that address belongs to a staff account, a link to choose a new password is on its way. It is good for fifteen minutes.</p>
         <div className="login__stack">
-          {onBundledData && (
-            <Link to={`/login/reset?token=${FAKE_RESET_TOKEN}`}>
-              <Button block>Open the link (bundled data)</Button>
-            </Link>
-          )}
           <Link to="/login/forgot"><Button block type="text">Send it again</Button></Link>
         </div>
         <p className="login__note"><Link to="/login" className="login__link">Back to sign in</Link></p>

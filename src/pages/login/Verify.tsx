@@ -3,18 +3,12 @@ import { OTPInput, REGEXP_ONLY_DIGITS, type SlotProps } from "input-otp";
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router";
 import { toast } from "sonner";
-import { FAKE_CODE, readChallenge, resendCode } from "../../providers/fakeAuthProvider";
+import { readChallenge, resendCode } from "../../providers/authProvider";
 import { useStaffSession } from "../../providers/session";
 import { LoginShell } from "./LoginShell";
 
 const LENGTH = 6;
 const RESEND_SECONDS = 30;
-
-/** n•••@domain: enough to recognise the address, not enough to read it off a shoulder. */
-const mask = (email: string) => {
-  const [user = "", domain = ""] = email.split("@");
-  return `${user.slice(0, 1)}•••@${domain}`;
-};
 
 function Slot({ char, isActive, hasFakeCaret }: SlotProps) {
   return (
@@ -32,10 +26,6 @@ export function Verify() {
   const [wait, setWait] = useState(RESEND_SECONDS);
 
   useEffect(() => {
-    if (challenge) toast(`Bundled data: your code is ${FAKE_CODE}.`, { id: "fake-code", duration: 8000 });
-  }, [challenge]);
-
-  useEffect(() => {
     if (wait <= 0) return;
     const timer = window.setTimeout(() => setWait(wait - 1), 1000);
     return () => window.clearTimeout(timer);
@@ -43,17 +33,20 @@ export function Verify() {
 
   if (!challenge) return <Navigate to="/login" replace />;
 
-  const resend = () => {
-    resendCode();
-    setWait(RESEND_SECONDS);
-    toast(`Code sent again to ${mask(challenge.email)}.`);
-  };
+  const resend = () =>
+    resendCode().then(
+      () => {
+        setWait(RESEND_SECONDS);
+        toast(`Code sent again to .`);
+      },
+      (error: Error) => toast.error(error.message),
+    );
 
   return (
     <LoginShell>
       <h1>Check your email</h1>
       <p className="login__lead">
-        We sent a {LENGTH}-digit code to <b>{mask(challenge.email)}</b>. It is good for ten minutes.
+        We sent a {LENGTH}-digit code to <b>{challenge.sentTo}</b>. It is good for ten minutes.
       </p>
       <OTPInput
         maxLength={LENGTH}

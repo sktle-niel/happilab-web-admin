@@ -27,8 +27,8 @@ a { color: inherit; }
 button { font: inherit; }
 
 /* Anything pressable answers on the press itself, not on release. */
-.ant-btn, .nav__item, .sidebar__promo button, .who, .card__kebab { transition: transform 160ms var(--ease-out), background-color 120ms ease, color 120ms ease; }
-.ant-btn:active, .nav__item:active, .sidebar__promo button:active { transform: scale(0.97); }
+.ant-btn, .nav__item, .who, .card__kebab { transition: transform 160ms var(--ease-out), background-color 120ms ease, color 120ms ease; }
+.ant-btn:active, .nav__item:active:active { transform: scale(0.97); }
 
 .app { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; transition: grid-template-columns 220ms var(--ease-out); }
 /* Tucked away, the sidebar slides out as its column closes. Closing is quicker than opening. */
@@ -42,10 +42,6 @@ button { font: inherit; }
 .nav__item.is-active { background: #fff; color: var(--ink); font-weight: 600; }
 .nav__icon { display: grid; place-items: center; width: 18px; font-size: 16px; }
 .nav__badge { margin-left: auto; background: var(--lime); color: var(--lime-ink); min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700; display: grid; place-items: center; font-variant-numeric: tabular-nums; }
-.sidebar__promo { margin-top: auto; background: var(--ink-3); border-radius: 14px; padding: 16px; }
-.sidebar__promo h4 { margin: 0 0 4px; font-size: 13.5px; font-weight: 600; }
-.sidebar__promo p { margin: 0 0 12px; font-size: 12px; color: #a8a8a4; line-height: 1.45; }
-.sidebar__promo button { width: 100%; border: 0; background: var(--lime); color: var(--lime-ink); font-weight: 600; font-size: 13px; padding: 9px; border-radius: var(--r-control); cursor: pointer; }
 
 .content { min-width: 0; padding: 24px 32px 48px; }
 .content__inner { max-width: 1400px; margin: 0 auto; }
@@ -103,7 +99,7 @@ button { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .app, .sidebar { transition: none; }
   .stagger > * { transition: opacity 200ms ease; transform: none !important; }
-  .ant-btn:active, .nav__item:active, .sidebar__promo button:active { transform: none; }
+  .ant-btn:active, .nav__item:active:active { transform: none; }
 }
 
 @media (max-width: 1100px) {
@@ -114,7 +110,6 @@ button { font: inherit; }
   .sidebar { position: static; height: auto; width: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 12px; }
   .app.is-collapsed .sidebar { display: none; }
   .sidebar__brand { padding: 0 8px 0 0; }
-  .sidebar__promo { display: none; }
   .content { padding: 16px; }
   .page-head h1 { font-size: 22px; }
 }

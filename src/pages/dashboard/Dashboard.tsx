@@ -1,18 +1,13 @@
 import { DownOutlined } from "@ant-design/icons";
-import { useList } from "@refinedev/core";
 import { Dropdown } from "antd";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { PageHead } from "../../components/Card";
-import type { CashOut, Order } from "../../data/fake/money";
-import type { Member } from "../../data/fake/people";
 import { canOpen, type PageKey } from "../../lib/access";
 import { dayLabel } from "../../lib/format";
-import { RANGES, figuresFor, type Range } from "../../lib/overview";
+import { EMPTY_STATS, RANGES, useStats, type Range } from "../../lib/useStats";
 import { useStaffSession } from "../../providers/session";
 import { CashOutsChart } from "./CashOutsChart";
 import { ActiveMembersCard, CashOutsPendingCard, OrdersCard, PointsFlowCard, PointsIssuedCard, QueueCard, SignInsCard } from "./widgets";
-
-const OFF = { pagination: { mode: "off" as const } };
 
 function RangePill({ range, onChange }: { range: Range; onChange: (range: Range) => void }) {
   const label = RANGES.find((r) => r.key === range)?.label ?? "Today";
@@ -32,16 +27,14 @@ const firstName = (name: string) => name.split(" ")[0] ?? name;
 /**
  * Three tiers: the figures across the top, the points flow down the left,
  * and on the right the small cards two abreast with the chart beneath.
- * The range pill re-counts every figure from the tables; every card
+ * The range pill asks the API to re-count every figure; every card
  * belongs to a page, and an account sees the cards of its pages.
  */
 export function Dashboard() {
   const { identity } = useStaffSession();
   const [range, setRange] = useState<Range>("today");
-  const { result: orders } = useList<Order>({ resource: "orders", ...OFF });
-  const { result: cashOuts } = useList<CashOut>({ resource: "cash-outs", ...OFF });
-  const { result: members } = useList<Member>({ resource: "members", ...OFF });
-  const figures = useMemo(() => figuresFor(range, orders?.data ?? [], cashOuts?.data ?? [], members?.data ?? []), [range, orders, cashOuts, members]);
+  const { data } = useStats(range);
+  const stats = data ?? EMPTY_STATS;
   const noun = RANGES.find((r) => r.key === range)?.noun ?? "today";
   const may = (page: PageKey) => canOpen(identity?.pages, page);
   const onTheDesk = identity?.role === "support";
@@ -54,17 +47,17 @@ export function Dashboard() {
       />
       <section className="dash">
         <div className="dash__stats stagger">
-          <PointsIssuedCard figures={figures} />
-          {may("cash-outs") && <CashOutsPendingCard figures={figures} />}
-          {may("members") && <ActiveMembersCard figures={figures} />}
+          <PointsIssuedCard stats={stats} />
+          {may("cash-outs") && <CashOutsPendingCard stats={stats} />}
+          {may("members") && <ActiveMembersCard stats={stats} />}
         </div>
         <div className="dash__body">
-          <PointsFlowCard figures={figures} />
+          <PointsFlowCard stats={stats} />
           <div className="dash__right stagger">
-            {may("support") && <QueueCard />}
-            {may("members") && <SignInsCard />}
-            {may("orders") && <OrdersCard figures={figures} noun={noun} />}
-            {may("cash-outs") && <CashOutsChart />}
+            {may("support") && <QueueCard stats={stats} />}
+            {may("members") && <SignInsCard stats={stats} />}
+            {may("orders") && <OrdersCard stats={stats} noun={noun} />}
+            {may("cash-outs") && <CashOutsChart cashOuts={stats.cashOuts} />}
           </div>
         </div>
       </section>

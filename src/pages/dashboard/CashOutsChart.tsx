@@ -2,9 +2,9 @@ import { BankOutlined, DownOutlined } from "@ant-design/icons";
 import { Dropdown } from "antd";
 import { useState } from "react";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from "recharts";
-import { overview } from "../../data/fake/dashboard";
-import { compact } from "../../lib/format";
 import { Card } from "../../components/Card";
+import { compact } from "../../lib/format";
+import type { Stats } from "../../lib/useStats";
 
 type Period = "monthly" | "weekly";
 const PERIODS: { key: Period; label: string }[] = [
@@ -15,9 +15,9 @@ const LIME = "#d6f26a";
 const LAVENDER = "#b9b2f4";
 
 /** The period at hand in colour, every other one hatched — the reference's sleep chart, for money. */
-export function CashOutsChart() {
+export function CashOutsChart({ cashOuts }: { cashOuts: Stats["cashOuts"] }) {
   const [period, setPeriod] = useState<Period>("monthly");
-  const series = period === "monthly" ? overview.cashOutsByMonth : overview.cashOutsByWeek;
+  const series = period === "monthly" ? cashOuts.byMonth : cashOuts.byWeek;
   const current = series.findIndex((point) => point.current);
   const label = PERIODS.find((p) => p.key === period)?.label ?? "Monthly";
   return (
@@ -44,14 +44,14 @@ export function CashOutsChart() {
         <div className="chart__stat">
           <i style={{ background: LIME }} />
           <div>
-            <b>₱{compact(overview.sentThisMonth)}<small>sent</small></b>
+            <b>₱{compact(cashOuts.sentThisMonthPesos)}<small>sent</small></b>
             <span>This month</span>
           </div>
         </div>
         <div className="chart__stat">
           <i style={{ background: LAVENDER }} />
           <div>
-            <b>{Math.floor(overview.averageSendHours / 24)}d {overview.averageSendHours % 24}h</b>
+            <b>{Math.floor(cashOuts.averageSendHours / 24)}d {cashOuts.averageSendHours % 24}h</b>
             <span>Average time to send</span>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { useDelete, useUpdate } from "@refinedev/core";
-import type { Product } from "../../data/fake/catalogue";
+import type { Product } from "../../data/types";
 import { undoToast } from "../../lib/undoToast";
 
 type Named = Pick<Product, "id" | "name">;

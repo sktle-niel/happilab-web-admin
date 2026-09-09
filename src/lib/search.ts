@@ -1,8 +1,8 @@
-import { products } from "../data/fake/catalogue";
-import { cashOuts, orders } from "../data/fake/money";
-import { members } from "../data/fake/people";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { api, query as queryString } from "./api";
+import { toCamel } from "./case";
 import { findDestinations } from "./destinations";
-import { pesos, thousands } from "./format";
 
 /** What the top bar can look for, in the order the chips show. */
 export type HitType = "members" | "orders" | "cash-outs" | "products" | "pages";
@@ -18,46 +18,44 @@ export const HIT_TYPES: { type: HitType; label: string }[] = [
 export type Hit = { key: string; type: HitType; title: string; subtitle: string; to: string; stat?: string };
 export type HitGroup = { type: HitType; label: string; to?: string; hits: Hit[] };
 
-const LIMIT = 4;
-const has = (q: string, ...fields: (string | null | undefined)[]) => fields.some((field) => field?.toLowerCase().includes(q));
+type RemoteType = Exclude<HitType, "pages">;
+type Found = { groups: { type: RemoteType; label: string; hits: { id: string; title: string; subtitle: string; stat: string | null }[] }[] };
+
+const MIN = 2;
+const WAIT_MS = 250;
+const listPath: Record<RemoteType, string> = { members: "/members", orders: "/orders", "cash-outs": "/cash-outs", products: "/products" };
 const listWith = (path: string, term: string) => `${path}?q=${encodeURIComponent(term)}`;
 
-const finders: Record<HitType, (q: string, term: string) => Hit[]> = {
-  pages: (_q, term) => findDestinations(term).map((d) => ({ key: `pages:${d.to}`, type: "pages", title: d.title, subtitle: d.crumb, to: d.to })),
-  members: (q) =>
-    members
-      .filter((m) => has(q, m.name, m.email, m.referralCode))
-      .slice(0, LIMIT)
-      .map((m) => ({ key: `members:${m.id}`, type: "members", title: m.name, subtitle: m.email, to: listWith("/members", m.name), stat: `${thousands(m.points)} pts` })),
-  orders: (q) =>
-    orders
-      .filter((o) => has(q, o.externalReference, o.buyerName))
-      .slice(0, LIMIT)
-      .map((o) => ({ key: `orders:${o.id}`, type: "orders", title: o.externalReference, subtitle: `${o.buyerName} · ${o.product}`, to: listWith("/orders", o.externalReference), stat: pesos(o.totalCentavos / 100) })),
-  "cash-outs": (q) =>
-    cashOuts
-      .filter((c) => has(q, c.reference, c.memberName))
-      .slice(0, LIMIT)
-      .map((c) => ({ key: `cash-outs:${c.id}`, type: "cash-outs", title: c.reference, subtitle: `${c.memberName} · ${c.status}`, to: listWith("/cash-outs", c.reference), stat: pesos(c.points) })),
-  products: (q) =>
-    products
-      .filter((p) => !p.deletedAt && has(q, p.name, p.blurb))
-      .slice(0, LIMIT)
-      .map((p) => ({ key: `products:${p.id}`, type: "products", title: p.name, subtitle: p.blurb, to: listWith("/products", p.name), stat: pesos(p.priceCentavos / 100) })),
-};
+/** The value once it has held still for a moment, so a search runs per pause, not per keystroke. */
+function useSettled(value: string) {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSettled(value), WAIT_MS);
+    return () => window.clearTimeout(timer);
+  }, [value]);
+  return settled;
+}
 
-const listPath: Partial<Record<HitType, string>> = { members: "/members", orders: "/orders", "cash-outs": "/cash-outs", products: "/products" };
-
-/** Everything the top bar can find among [types], a few per group, pages first. */
-export function searchAll(query: string, types: readonly HitType[]): HitGroup[] {
-  const term = query.trim();
-  const q = term.toLowerCase();
-  if (q.length < 2) return [];
-  return HIT_TYPES.filter((t) => types.includes(t.type))
-    .sort((a, b) => Number(b.type === "pages") - Number(a.type === "pages"))
-    .map(({ type, label }) => {
-      const path = listPath[type];
-      return { type, label, hits: finders[type](q, term), ...(path && { to: listWith(path, term) }) };
-    })
-    .filter((group) => group.hits.length > 0);
+/** Pages found here, then whatever the API found among [types], a few per group; the API answers only for the pages the account may open. */
+export function useSearch(input: string, types: readonly HitType[]): HitGroup[] {
+  const term = input.trim();
+  const settled = useSettled(term);
+  const remote = types.filter((t): t is RemoteType => t !== "pages");
+  const { data } = useQuery({
+    queryKey: ["search", settled, remote.join(",")],
+    queryFn: () => api.get(`/v1/admin/search${queryString({ q: settled, types: remote.join(",") })}`).then((body) => toCamel<Found>(body)),
+    enabled: settled.length >= MIN && remote.length > 0,
+    placeholderData: keepPreviousData,
+  });
+  if (term.length < MIN) return [];
+  const pages: Hit[] = types.includes("pages") ? findDestinations(term).map((d) => ({ key: `pages:${d.to}`, type: "pages", title: d.title, subtitle: d.crumb, to: d.to })) : [];
+  const groups: HitGroup[] = (data?.groups ?? [])
+    .filter((group) => remote.includes(group.type))
+    .map((group) => ({
+      type: group.type,
+      label: group.label,
+      to: listWith(listPath[group.type], term),
+      hits: group.hits.map((hit) => ({ key: `${group.type}:${hit.id}`, type: group.type, title: hit.title, subtitle: hit.subtitle, to: listWith(listPath[group.type], hit.title), ...(hit.stat && { stat: hit.stat }) })),
+    }));
+  return [...(pages.length > 0 ? [{ type: "pages" as const, label: "Pages", hits: pages }] : []), ...groups];
 }

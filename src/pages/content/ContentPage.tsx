@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { ListCard } from "../../components/ListCard";
 import { Spot } from "../../components/Spot";
-import type { Faq, Post, TermsSection } from "../../data/fake/catalogue";
+import type { Faq, Post, TermsSection } from "../../data/types";
 import { Faqs, Posts, Terms, type Editing } from "./ContentTables";
 
 type Tab = "posts" | "faqs" | "terms";

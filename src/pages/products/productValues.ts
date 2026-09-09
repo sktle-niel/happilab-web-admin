@@ -1,4 +1,4 @@
-import type { Product, ProductBadge } from "../../data/fake/catalogue";
+import type { Product, ProductBadge } from "../../data/types";
 import type { Store } from "../../lib/products";
 
 /** The form's shape: pesos rather than centavos, and "" for no badge so a chip row can hold it. */
@@ -28,8 +28,8 @@ export const fromRecord = (p: Product): ProductValues => ({
   isActive: p.isActive,
 });
 
-/** What the table keeps. Validation has already made every number real; empty links are dropped. The soft-delete stamp is the table's, never the form's. */
-export const toRecord = (v: ProductValues, position: number): Omit<Product, "id" | "deletedAt"> => ({
+/** What the API keeps. Validation has already made every number real; empty links are dropped. Position and the soft-delete stamp are the API's, never the form's. */
+export const toRecord = (v: ProductValues): Omit<Product, "id" | "deletedAt" | "position"> => ({
   name: v.name.trim(),
   blurb: v.blurb.trim(),
   priceCentavos: Math.round((v.price ?? 0) * 100),
@@ -38,6 +38,5 @@ export const toRecord = (v: ProductValues, position: number): Omit<Product, "id"
   imageUrl: v.imageUrl,
   badge: v.badge || null,
   isActive: v.isActive,
-  position,
   storeLinks: Object.fromEntries(Object.entries(v.storeLinks ?? {}).filter(([, url]) => url?.trim())) as Product["storeLinks"],
 });

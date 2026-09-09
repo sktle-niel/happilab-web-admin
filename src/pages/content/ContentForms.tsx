@@ -1,7 +1,7 @@
 import { Form, Input, Segmented } from "antd";
 import { useMemo } from "react";
 import { RecordModal } from "../../components/RecordModal";
-import type { Faq, Post, TermsSection } from "../../data/fake/catalogue";
+import type { Faq, Post, TermsSection } from "../../data/types";
 import { httpsOnly, required } from "../../lib/rules";
 import { useSaveRecord } from "../../lib/useSaveRecord";
 
@@ -12,17 +12,18 @@ const MEDIA = [
   { label: "Image", value: "image" },
   { label: "Video", value: "video" },
 ];
-const STATUS = [
+const STATUS: { label: string; value: Standing }[] = [
   { label: "Published", value: "published" },
   { label: "Draft", value: "draft" },
 ];
 
-type PostValues = { body: string; media: Post["media"]; mediaUrl: string; status: Post["status"] };
-const EMPTY_POST: PostValues = { body: "", media: "none", mediaUrl: "", status: "published" };
+type Standing = "published" | "draft";
+type PostValues = { body: string; mediaKind: Post["mediaKind"]; mediaUrl: string; status: Standing };
+const EMPTY_POST: PostValues = { body: "", mediaKind: "none", mediaUrl: "", status: "published" };
 
 /** Only asked for once the post carries media. */
 function MediaLink() {
-  const media = Form.useWatch<Post["media"]>("media");
+  const media = Form.useWatch<Post["mediaKind"]>("mediaKind");
   if (!media || media === "none") return null;
   return (
     <Form.Item name="mediaUrl" label={media === "video" ? "Video link" : "Image link"} rules={[{ type: "url", message: "Enter a full link." }, httpsOnly]}>
@@ -33,17 +34,11 @@ function MediaLink() {
 
 export function PostForm({ open, record, onClose }: Editing<Post>) {
   const { save, busy } = useSaveRecord("posts", { created: "Post saved", updated: "Post saved", description: "Members see the feed on their next launch." });
-  const initial = useMemo<PostValues>(() => (record ? { body: record.body, media: record.media, mediaUrl: record.mediaUrl ?? "", status: record.status } : EMPTY_POST), [record]);
+  const initial = useMemo<PostValues>(() => (record ? { body: record.body, mediaKind: record.mediaKind, mediaUrl: record.mediaUrl ?? "", status: record.isPublished ? "published" : "draft" } : EMPTY_POST), [record]);
   const submit = (values: PostValues) =>
     save(
       record?.id ?? null,
-      {
-        body: values.body.trim(),
-        media: values.media,
-        mediaUrl: values.media === "none" ? null : values.mediaUrl.trim() || null,
-        status: values.status,
-        ...(record ? {} : { likes: 0, comments: 0, publishedAt: new Date().toISOString() }),
-      },
+      { body: values.body.trim(), mediaKind: values.mediaKind, mediaUrl: values.mediaKind === "none" ? null : values.mediaUrl.trim() || null, isPublished: values.status === "published" },
       onClose,
     );
   return (
@@ -52,7 +47,7 @@ export function PostForm({ open, record, onClose }: Editing<Post>) {
         <Input.TextArea rows={4} maxLength={500} showCount placeholder="New batch of Sakura Glow Soap is in." />
       </Form.Item>
       <div className="field-grid">
-        <Form.Item name="media" label="Media"><Segmented options={MEDIA} /></Form.Item>
+        <Form.Item name="mediaKind" label="Media"><Segmented options={MEDIA} /></Form.Item>
         <Form.Item name="status" label="Status"><Segmented options={STATUS} /></Form.Item>
       </div>
       <MediaLink />
@@ -63,11 +58,11 @@ export function PostForm({ open, record, onClose }: Editing<Post>) {
 type FaqValues = { question: string; answer: string };
 const EMPTY_FAQ: FaqValues = { question: "", answer: "" };
 
-export function FaqForm({ open, record, onClose, nextPosition }: Editing<Faq> & { nextPosition: number }) {
+export function FaqForm({ open, record, onClose }: Editing<Faq>) {
   const { save, busy } = useSaveRecord("faqs", { created: "FAQ added", updated: "FAQ saved", description: "The help centre shows it on the next launch." });
   const initial = useMemo<FaqValues>(() => (record ? { question: record.question, answer: record.answer } : EMPTY_FAQ), [record]);
   const submit = (values: FaqValues) =>
-    save(record?.id ?? null, { question: values.question.trim(), answer: values.answer.trim(), ...(record ? {} : { position: nextPosition, isActive: true }) }, onClose);
+    save(record?.id ?? null, { question: values.question.trim(), answer: values.answer.trim() }, onClose);
   return (
     <RecordModal open={open} title={record ? "Edit FAQ" : "Add FAQ"} okText="Save FAQ" initialValues={initial} busy={busy} onCancel={onClose} onSubmit={submit}>
       <Form.Item name="question" label="Question" rules={[required("The question members ask."), { max: 120, message: "Up to 120 characters." }]}>
@@ -83,10 +78,10 @@ export function FaqForm({ open, record, onClose, nextPosition }: Editing<Faq> & 
 type SectionValues = { heading: string; body: string };
 const EMPTY_SECTION: SectionValues = { heading: "", body: "" };
 
-export function SectionForm({ open, record, onClose, nextPosition }: Editing<TermsSection> & { nextPosition: number }) {
+export function SectionForm({ open, record, onClose }: Editing<TermsSection>) {
   const { save, busy } = useSaveRecord("terms", { created: "Section added", updated: "Section saved", description: "Members read the terms as they stand on their next launch." });
   const initial = useMemo<SectionValues>(() => (record ? { heading: record.heading, body: record.body } : EMPTY_SECTION), [record]);
-  const submit = (values: SectionValues) => save(record?.id ?? null, { heading: values.heading.trim(), body: values.body.trim(), ...(record ? {} : { position: nextPosition }) }, onClose);
+  const submit = (values: SectionValues) => save(record?.id ?? null, { heading: values.heading.trim(), body: values.body.trim() }, onClose);
   return (
     <RecordModal open={open} title={record ? "Edit section" : "Add section"} okText="Save section" initialValues={initial} busy={busy} onCancel={onClose} onSubmit={submit}>
       <Form.Item name="heading" label="Heading" rules={[required("Name the section."), { max: 60, message: "Up to 60 characters." }]}>

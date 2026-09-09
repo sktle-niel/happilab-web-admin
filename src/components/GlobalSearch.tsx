@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { canOpen, type PageKey } from "../lib/access";
 import { QUICK_ACTIONS } from "../lib/destinations";
 import { readRecent, remember } from "../lib/recentSearches";
-import { HIT_TYPES, searchAll, type Hit, type HitType } from "../lib/search";
+import { HIT_TYPES, useSearch, type Hit, type HitType } from "../lib/search";
 import { useAttention } from "../lib/useAttention";
 import { useStaffSession } from "../providers/session";
 import { SearchPanel, type Section } from "./SearchPanel";
@@ -57,9 +57,10 @@ export function GlobalSearch() {
   }, []);
 
   const term = query.trim();
+  const found = useSearch(term, types);
   const sections = useMemo<Section[]>(
-    () => (term.length >= 2 ? searchAll(term, types).map((group) => ({ label: group.label, rows: group.hits.map(hitRow), ...(group.to && { seeAll: group.to }) })) : restingSections(recent, pages, pendingCashOuts, queued)),
-    [term, types, recent, pages, pendingCashOuts, queued],
+    () => (term.length >= 2 ? found.map((group) => ({ label: group.label, rows: group.hits.map(hitRow), ...(group.to && { seeAll: group.to }) })) : restingSections(recent, pages, pendingCashOuts, queued)),
+    [term, found, recent, pages, pendingCashOuts, queued],
   );
   const flat = useMemo(() => sections.flatMap((section) => section.rows), [sections]);
 

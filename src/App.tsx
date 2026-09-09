@@ -6,7 +6,6 @@ import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 import { AppFrame } from "./layout/AppFrame";
 import { PAGES, type PageKey } from "./lib/access";
-import { previewing } from "./lib/env";
 import { AuditList } from "./pages/audit/AuditList";
 import { CashOutsList } from "./pages/cashouts/CashOutsList";
 import { ContentPage } from "./pages/content/ContentPage";
@@ -24,8 +23,8 @@ import { SettingsPage } from "./pages/settings/SettingsPage";
 import { StaffList } from "./pages/staff/StaffList";
 import { SupportPage } from "./pages/support/SupportPage";
 import { accessControl } from "./providers/accessControl";
-import { fakeAuthProvider } from "./providers/fakeAuthProvider";
-import { fakeDataProvider } from "./providers/fakeDataProvider";
+import { authProvider } from "./providers/authProvider";
+import { dataProvider } from "./providers/dataProvider";
 import { sonnerNotifications } from "./providers/notifications";
 import { theme } from "./theme";
 
@@ -67,8 +66,8 @@ export function App() {
     <BrowserRouter>
       <ConfigProvider theme={theme}>
         <Refine
-          dataProvider={fakeDataProvider}
-          authProvider={fakeAuthProvider}
+          dataProvider={dataProvider}
+          authProvider={authProvider}
           accessControlProvider={accessControl}
           notificationProvider={sonnerNotifications}
           routerProvider={routerProvider}
@@ -98,13 +97,9 @@ export function App() {
             </Route>
             <Route
               element={
-                previewing ? (
-                  <Outlet />
-                ) : (
-                  <Authenticated key="signed-out" fallback={<Outlet />}>
-                    <NavigateToResource resource="dashboard" />
-                  </Authenticated>
-                )
+                <Authenticated key="signed-out" fallback={<Outlet />}>
+                  <NavigateToResource resource="dashboard" />
+                </Authenticated>
               }
             >
               <Route path="/login" element={<Login />} />

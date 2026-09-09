@@ -4,68 +4,78 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { StatusTag } from "../../components/StatusTag";
-import { end, resolve, send, type Conversation, type Message } from "../../data/fake/support";
+import type { Message, Thread as Chat } from "../../data/types";
 import { PHOTO_ACCEPT, photoRefusal } from "../../lib/attachments";
 import { dayLabel, initials } from "../../lib/format";
+import { uploadFile } from "../../lib/uploads";
+import { useDeskActions, useThread } from "../../lib/useDesk";
+import type { Me } from "../../providers/session";
+import { EmptyPane } from "./SupportPage";
 import { TicketForm } from "./TicketForm";
 
-const clock = (at: Date) => at.toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit" });
+type Actions = ReturnType<typeof useDeskActions>;
+const clock = (iso: string) => new Date(iso).toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit" });
 
 function Bubble({ message }: { message: Message }) {
-  if (message.sender === "system") return <div className="chat-note">{message.text}</div>;
+  if (message.sender === "system") return <div className="chat-note">{message.body}</div>;
   return (
-    <div className={`chat-bubble chat-bubble--${message.sender}${message.imageUrl ? " chat-bubble--photo" : ""}`}>
+    <div className={`chat-bubble chat-bubble--${message.sender}${message.attachmentUrl ? " chat-bubble--photo" : ""}`}>
       {message.sender === "bot" && <span className="chat-bubble__who">Bot</span>}
-      {message.imageUrl && <img className="chat-bubble__photo" src={message.imageUrl} alt="Photo sent in the chat" />}
-      {message.text && <p>{message.text}</p>}
-      <time>{clock(message.at)}</time>
+      {message.attachmentUrl && <img className="chat-bubble__photo" src={message.attachmentUrl} alt="Photo sent in the chat" />}
+      {message.body && <p>{message.body}</p>}
+      <time>{clock(message.sentAt)}</time>
     </div>
   );
 }
 
 /** Where the chat stands, in a line under the name. */
-const standing = (c: Conversation, mine: boolean) => {
+const standing = (c: Chat, mine: boolean) => {
   if (c.status === "queued") return "waiting";
   if (c.status === "with_agent") return `with ${mine ? "you" : c.agentName}`;
-  return `ended ${c.endedAt ? dayLabel(c.endedAt) : ""}${c.agentName ? ` · ${c.agentName}` : ""}`;
+  return `ended ${c.endedAt ? dayLabel(new Date(c.endedAt)) : ""}${c.agentName ? ` · ${c.agentName}` : ""}`;
 };
 
 /** Resolve ends the chat as done; End leaves it unresolved; a ticket carries the account issue to whoever fixes it. */
-function Actions({ c, me, onTicket }: { c: Conversation; me: string; onTicket: () => void }) {
-  const live = c.status === "with_agent" && c.agentName === me;
+function Moves({ c, mine, actions, onTicket }: { c: Chat; mine: boolean; actions: Actions; onTicket: () => void }) {
+  const live = c.status === "with_agent" && mine;
   const unresolved = c.status === "ended" && c.resolution !== "resolved";
   return (
     <Space className="chat-pane__actions">
       {c.status !== "queued" && <Button size="small" onClick={onTicket}>Open ticket</Button>}
-      {(live || unresolved) && <Button size="small" type="primary" onClick={() => resolve(c.id, me)}>{live ? "Resolve" : "Mark resolved"}</Button>}
-      {live && <Button size="small" type="text" danger onClick={() => end(c.id, me)}>End chat</Button>}
+      {(live || unresolved) && <Button size="small" type="primary" loading={actions.busy} onClick={() => actions.resolve(c.id)}>{live ? "Resolve" : "Mark resolved"}</Button>}
+      {live && <Button size="small" type="text" danger disabled={actions.busy} onClick={() => actions.end(c.id)}>End chat</Button>}
     </Space>
   );
 }
 
-function Composer({ c, mine }: { c: Conversation; mine: boolean }) {
+function Composer({ c, mine, actions }: { c: Chat; mine: boolean; actions: Actions }) {
   const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
   const submit = () => {
-    const text = draft.trim();
-    if (!text) return;
-    send(c.id, text);
-    setDraft("");
+    const body = draft.trim();
+    if (!body) return;
+    actions.reply(c.id, { body }).then(() => setDraft(""));
   };
-  /** A photo goes out on its own, once it is under the limit the app holds members to as well. */
+  /** A photo goes out on its own, once it is under the limit the app holds members to as well; it lands in storage first. */
   const attach = (file: File) => {
     const refusal = photoRefusal(file.size);
     if (refusal) toast.error(refusal);
-    else send(c.id, "", URL.createObjectURL(file));
+    else {
+      setSending(true);
+      uploadFile("chat", file)
+        .then((url) => actions.reply(c.id, { attachmentUrl: url }), (error: Error) => toast.error(error.message))
+        .finally(() => setSending(false));
+    }
     return Upload.LIST_IGNORE;
   };
   if (c.status === "with_agent" && mine) {
     return (
       <div className="chat-composer">
-        <Upload accept={PHOTO_ACCEPT} showUploadList={false} beforeUpload={attach}>
-          <Button icon={<PictureOutlined />} aria-label="Send a photo" title="Send a photo, up to 5 MB" />
+        <Upload accept={PHOTO_ACCEPT} showUploadList={false} disabled={sending} beforeUpload={attach}>
+          <Button icon={<PictureOutlined />} loading={sending} aria-label="Send a photo" title="Send a photo, up to 5 MB" />
         </Upload>
         <Input value={draft} placeholder="Write a reply…" onChange={(e) => setDraft(e.target.value)} onPressEnter={submit} autoFocus />
-        <Button type="primary" icon={<SendOutlined />} onClick={submit} disabled={!draft.trim()}>Send</Button>
+        <Button type="primary" icon={<SendOutlined />} onClick={submit} disabled={!draft.trim()} loading={actions.busy}>Send</Button>
       </div>
     );
   }
@@ -74,35 +84,40 @@ function Composer({ c, mine }: { c: Conversation; mine: boolean }) {
 }
 
 /** The conversation: who, where it stands, every line said, and what the agent can do with it. */
-export function Thread({ conversation: c, me }: { conversation: Conversation; me: string }) {
+export function Thread({ id, me }: { id: string; me: Me }) {
+  const { data: c, isError } = useThread(id);
+  const actions = useDeskActions();
   const [ticketOpen, setTicketOpen] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
-  const mine = c.agentName === me;
+  const lines = c?.messages.length ?? 0;
   // Braces on purpose: scrollIntoView may return a value, and an effect must not.
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
-  }, [c.messages.length]);
+  }, [lines]);
+  if (isError) return <EmptyPane title="No such chat" text="It may have been removed since this link was made." />;
+  if (!c) return <div className="card chat-pane" />;
+  const mine = c.agentId === me.id;
   return (
     <div className="chat-pane">
       <header className="chat-pane__head">
         <span className="who__avatar">{initials(c.memberName)}</span>
         <div>
           <div className="who__name">{c.memberName}</div>
-          <div className="who__email">{c.topic} · {standing(c, mine)}</div>
-          {(c.resolution || c.ticketIds.length > 0) && (
+          <div className="who__email">{c.topic ?? "No topic"} · {standing(c, mine)}</div>
+          {(c.resolution || c.tickets.length > 0) && (
             <div className="chat-pane__tickets">
               {c.resolution && <StatusTag status={c.resolution} />}
-              {c.ticketIds.map((id) => <Link key={id} to={`/support/tickets/${id}`} className="chip chip--lavender">Ticket</Link>)}
+              {c.tickets.map((t) => <Link key={t.id} to={`/support/tickets/${t.id}`} className="chip chip--lavender">{t.reference}</Link>)}
             </div>
           )}
         </div>
-        <Actions c={c} me={me} onTicket={() => setTicketOpen(true)} />
+        <Moves c={c} mine={mine} actions={actions} onTicket={() => setTicketOpen(true)} />
       </header>
       <div className="chat-thread">
         {c.messages.map((m) => <Bubble key={m.id} message={m} />)}
         <div ref={endRef} />
       </div>
-      <Composer c={c} mine={mine} />
+      <Composer c={c} mine={mine} actions={actions} />
       <TicketForm open={ticketOpen} conversation={c} me={me} onClose={() => setTicketOpen(false)} />
     </div>
   );

@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router";
+import { NavLink } from "react-router";
 import { canOpen, type PageKey } from "../lib/access";
 import { useAttention } from "../lib/useAttention";
 import { useStaffSession } from "../providers/session";
@@ -10,7 +10,6 @@ import { NAV } from "./nav";
  * is inert: nothing in it can be tabbed to or read while it is off screen.
  */
 export function Sidebar({ hidden }: { hidden: boolean }) {
-  const navigate = useNavigate();
   const { identity } = useStaffSession();
   const { pendingCashOuts, queued } = useAttention();
   const badges: Partial<Record<PageKey, number>> = { dashboard: pendingCashOuts, "cash-outs": pendingCashOuts, support: queued };
@@ -30,11 +29,6 @@ export function Sidebar({ hidden }: { hidden: boolean }) {
           </NavLink>
         ))}
       </nav>
-      <div className="sidebar__promo">
-        <h4>Running on bundled data</h4>
-        <p>Point the admin at the API to see the real programme.</p>
-        <button type="button" onClick={() => navigate("/settings")}>Set up backend</button>
-      </div>
     </aside>
   );
 }

@@ -1,6 +1,6 @@
 import { Checkbox, Form, Input, Modal, Select } from "antd";
 import { useEffect } from "react";
-import type { Staff } from "../../data/fake/people";
+import type { Staff } from "../../data/types";
 import { ALL_PAGES, ROLE_LABELS, ROLE_PRESETS, pageLabel, type PageKey, type StaffRole } from "../../lib/access";
 import { useSaveRecord } from "../../lib/useSaveRecord";
 
@@ -26,7 +26,7 @@ export function StaffForm({ open, account, onClose }: Props) {
   const submit = (values: Values) => {
     const pages: PageKey[] = ["dashboard", ...values.pages.filter((key) => key !== "dashboard")];
     if (account) save(account.id, { name: values.name, role: values.role, pages }, onClose, `${values.name} can open ${pages.length - 1} pages besides the dashboard.`);
-    else save(null, { ...values, pages, status: "active", lastSeenAt: null }, onClose, "They can sign in with a code from their email.");
+    else save(null, { ...values, pages }, onClose, "An email with a link to choose their password is on its way.");
   };
 
   return (
