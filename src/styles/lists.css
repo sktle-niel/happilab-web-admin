@@ -9,6 +9,7 @@
 .cell-primary { font-weight: 700; }
 .cell-muted { color: var(--text-2); font-size: 12px; }
 .cell-nowrap { white-space: nowrap; }
+.order-buttons { display: inline-flex; gap: 2px; }
 .cell-thumb { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; margin-right: 12px; vertical-align: middle; }
 .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
 .settings-grid { align-items: start; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
@@ -21,3 +22,10 @@
 .no-access .card__icon { margin: 0 auto 14px; width: 40px; height: 40px; font-size: 18px; }
 .no-access h2 { margin: 0 0 6px; font-size: 18px; letter-spacing: -0.01em; }
 .no-access p { margin: 0 0 18px; color: var(--text-2); font-size: 13.5px; }
+
+/* Settings assets: one row per slot, the clips as chips. */
+.asset-slot { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid rgba(0, 0, 0, 0.05); }
+.asset-slot__text { display: grid; gap: 2px; font-size: 13px; }
+.asset-slot--clips { grid-template-columns: 1fr; }
+.asset-clips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.asset-clips .chip button { border: 0; background: none; color: inherit; margin-left: 4px; padding: 0; cursor: pointer; font-weight: 700; }
