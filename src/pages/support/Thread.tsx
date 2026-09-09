@@ -1,9 +1,11 @@
-import { SendOutlined } from "@ant-design/icons";
-import { Button, Input, Space } from "antd";
+import { PictureOutlined, SendOutlined } from "@ant-design/icons";
+import { Button, Input, Space, Upload } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
+import { toast } from "sonner";
 import { StatusTag } from "../../components/StatusTag";
 import { end, resolve, send, type Conversation, type Message } from "../../data/fake/support";
+import { PHOTO_ACCEPT, photoRefusal } from "../../lib/attachments";
 import { dayLabel, initials } from "../../lib/format";
 import { TicketForm } from "./TicketForm";
 
@@ -12,9 +14,10 @@ const clock = (at: Date) => at.toLocaleTimeString("en-PH", { hour: "2-digit", mi
 function Bubble({ message }: { message: Message }) {
   if (message.sender === "system") return <div className="chat-note">{message.text}</div>;
   return (
-    <div className={`chat-bubble chat-bubble--${message.sender}`}>
+    <div className={`chat-bubble chat-bubble--${message.sender}${message.imageUrl ? " chat-bubble--photo" : ""}`}>
       {message.sender === "bot" && <span className="chat-bubble__who">Bot</span>}
-      <p>{message.text}</p>
+      {message.imageUrl && <img className="chat-bubble__photo" src={message.imageUrl} alt="Photo sent in the chat" />}
+      {message.text && <p>{message.text}</p>}
       <time>{clock(message.at)}</time>
     </div>
   );
@@ -48,9 +51,19 @@ function Composer({ c, mine }: { c: Conversation; mine: boolean }) {
     send(c.id, text);
     setDraft("");
   };
+  /** A photo goes out on its own, once it is under the limit the app holds members to as well. */
+  const attach = (file: File) => {
+    const refusal = photoRefusal(file.size);
+    if (refusal) toast.error(refusal);
+    else send(c.id, "", URL.createObjectURL(file));
+    return Upload.LIST_IGNORE;
+  };
   if (c.status === "with_agent" && mine) {
     return (
       <div className="chat-composer">
+        <Upload accept={PHOTO_ACCEPT} showUploadList={false} beforeUpload={attach}>
+          <Button icon={<PictureOutlined />} aria-label="Send a photo" title="Send a photo, up to 5 MB" />
+        </Upload>
         <Input value={draft} placeholder="Write a reply…" onChange={(e) => setDraft(e.target.value)} onPressEnter={submit} autoFocus />
         <Button type="primary" icon={<SendOutlined />} onClick={submit} disabled={!draft.trim()}>Send</Button>
       </div>

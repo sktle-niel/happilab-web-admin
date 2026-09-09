@@ -7,7 +7,7 @@ import { nextMessageId, seedConversations } from "./supportSeed";
  * pushed to whoever is looking, the way the API's channel will.
  */
 export type Sender = "member" | "bot" | "agent" | "system";
-export type Message = { id: string; sender: Sender; text: string; at: Date };
+export type Message = { id: string; sender: Sender; text: string; at: Date; imageUrl: string | null };
 export type Resolution = "resolved" | "unresolved";
 export type Conversation = {
   id: string;
@@ -30,7 +30,7 @@ const patch = (id: string, change: (c: Conversation) => Conversation) => {
   conversations = conversations.map((c) => (c.id === id ? change(c) : c));
   emit();
 };
-const withLine = (c: Conversation, sender: Sender, text: string): Conversation => ({ ...c, messages: [...c.messages, { id: nextMessageId(), sender, text, at: new Date() }] });
+const withLine = (c: Conversation, sender: Sender, text: string, imageUrl: string | null = null): Conversation => ({ ...c, messages: [...c.messages, { id: nextMessageId(), sender, text, at: new Date(), imageUrl }] });
 
 /** Every conversation, live; re-renders the caller when any changes. */
 export function useConversations(): Conversation[] {
@@ -53,9 +53,9 @@ export function join(id: string, agentName: string): void {
 
 const REPLIES = ["Okay, thank you!", "Got it, I will wait for that.", "Thanks for checking."];
 
-/** The agent's line, and a beat later the member's, so the thread feels attended. */
-export function send(id: string, text: string): void {
-  patch(id, (c) => withLine(c, "agent", text));
+/** The agent's line or photo, and a beat later the member's reply, so the thread feels attended. */
+export function send(id: string, text: string, imageUrl: string | null = null): void {
+  patch(id, (c) => withLine(c, "agent", text, imageUrl));
   const reply = REPLIES[Math.floor(Math.random() * REPLIES.length)] ?? REPLIES[0]!;
   window.setTimeout(() => patch(id, (c) => (c.status === "with_agent" ? withLine(c, "member", reply) : c)), 1800);
 }

@@ -3,7 +3,7 @@ import type { Conversation, Message, Sender } from "./support";
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000);
 const daysAgo = (d: number, hour: number) => new Date(new Date(new Date().toDateString()).getTime() - d * 86_400_000 + hour * 3_600_000);
 let nextId = 100;
-const line = (sender: Sender, text: string, at: Date): Message => ({ id: `m${nextId++}`, sender, text, at });
+const line = (sender: Sender, text: string, at: Date, imageUrl: string | null = null): Message => ({ id: `m${nextId++}`, sender, text, at, imageUrl });
 export const nextMessageId = () => `m${nextId++}`;
 
 const GREETING = "Hi! You are chatting with Falcon Crest support. What can we help you with today?";
@@ -50,6 +50,7 @@ export const seedConversations: Conversation[] = [
     line("member", "I need help with my payout account.", daysAgo(2, 15)),
     line("system", "Maria Santos joined the chat.", daysAgo(2, 15.1)),
     line("agent", "Hi Miguel. The name on the wallet does not match your account, so the cash-out is on hold. Can you send a screenshot of the wallet profile?", daysAgo(2, 15.2)),
+    line("member", "", daysAgo(2, 15.3), "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=480&q=80"),
     line("system", "Ticket T-0001 opened: Payout account.", daysAgo(2, 15.4)),
     line("system", "Chat ended by Maria Santos.", daysAgo(2, 15.5)),
   ] },

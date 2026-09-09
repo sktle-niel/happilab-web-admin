@@ -16,7 +16,7 @@ type Props = { open: boolean; conversation: Conversation; me: string; onClose: (
 const categoryFor = (topic: string): TicketCategory => TICKET_CATEGORIES.find((c) => c.label === topic)?.value ?? "other";
 
 /** What the member said, as the ticket's opening detail, so whoever takes it need not reread the chat. */
-const memberSaid = (c: Conversation) => c.messages.filter((m) => m.sender === "member").map((m) => m.text).join(" ");
+const memberSaid = (c: Conversation) => c.messages.filter((m) => m.sender === "member" && m.text).map((m) => m.text).join(" ");
 
 /** Opens a ticket from a chat: the account issue, in the member's words, handed to a teammate to fix. */
 export function TicketForm({ open, conversation, me, onClose }: Props) {
