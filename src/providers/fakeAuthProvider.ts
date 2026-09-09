@@ -68,7 +68,10 @@ export const fakeAuthProvider: AuthProvider = {
         return challenge(GOOGLE_ACCOUNT, "google");
       case "password":
         if (!params.email.includes("@") || params.password.length < 12) return failed("Check the email and password.");
-        return challenge(params.email.trim().toLowerCase(), "password");
+        const email = params.email.trim().toLowerCase();
+        // A deactivated account answers like a wrong password, as the API does: nothing to enumerate.
+        if (staff.find((s) => s.email === email)?.status === "suspended") return failed("Check the email and password.");
+        return challenge(email, "password");
       case "otp": {
         const pending = readChallenge();
         if (!pending) return failed("Start again from the sign-in page.");
@@ -90,6 +93,11 @@ export const fakeAuthProvider: AuthProvider = {
     if (previewing) return { authenticated: true };
     const session = read<Session>(localStorage, SESSION);
     if (!session) return { authenticated: false, redirectTo: "/login", logout: true };
+    // Deactivation ends every session, so a visit after it lands on sign-in.
+    if (staff.find((s) => s.email === session.email)?.status === "suspended") {
+      localStorage.removeItem(SESSION);
+      return { authenticated: false, redirectTo: "/login", logout: true };
+    }
     if (Date.now() - session.lastSeen > IDLE_MS) {
       localStorage.removeItem(SESSION);
       sessionStorage.setItem(EXPIRED, "1");

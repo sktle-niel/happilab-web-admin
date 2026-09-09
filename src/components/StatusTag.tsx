@@ -19,11 +19,12 @@ const STYLES: Record<string, { background: string; color: string }> = {
   refunded: { background: "#ffd6d6", color: "#7a1f1f" },
 };
 
-export function StatusTag({ status }: { status: string }) {
+/** [label] is the word the page uses for a status the wire names otherwise, such as "Disabled" for suspended. */
+export function StatusTag({ status, label }: { status: string; label?: string }) {
   const style = STYLES[status] ?? { background: "#f4f4f1", color: "#5f5f5c" };
   return (
     <Tag style={{ ...style, border: 0, borderRadius: 999, fontWeight: 700, padding: "2px 10px", textTransform: "capitalize" }}>
-      {status}
+      {label ?? status}
     </Tag>
   );
 }

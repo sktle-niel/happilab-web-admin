@@ -1,8 +1,6 @@
 import { useDelete, useUpdate } from "@refinedev/core";
-import { toast } from "sonner";
 import type { Product } from "../../data/fake/catalogue";
-
-const UNDO_MS = 6000;
+import { undoToast } from "../../lib/undoToast";
 
 type Named = Pick<Product, "id" | "name">;
 
@@ -29,11 +27,7 @@ export function useProductRemoval() {
       {
         onSuccess: () => {
           onDone?.();
-          toast(`${product.name} deleted`, {
-            description: "Gone from the app. It waits under Deleted if you need it back.",
-            duration: UNDO_MS,
-            action: { label: "Undo", onClick: () => restore(product) },
-          });
+          undoToast(`${product.name} deleted`, "Gone from the app. It waits under Deleted if you need it back.", () => restore(product));
         },
       },
     );
