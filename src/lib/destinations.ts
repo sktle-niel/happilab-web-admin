@@ -1,3 +1,5 @@
+import type { PageKey } from "./access";
+
 /**
  * Every place the top bar can take you: pages, the cards and tabs on
  * them, and the settings fields. `to` may carry a hash naming the
@@ -69,3 +71,11 @@ export function findDestinations(query: string, limit = 6): Destination[] {
     .slice(0, limit)
     .map(({ d }) => d);
 }
+
+/** The things staff most often come to do, one key each while the search is open, shown only to accounts that may. */
+export type QuickAction = { label: string; to: string; key: string; page: PageKey };
+export const QUICK_ACTIONS: QuickAction[] = [
+  { label: "Add product", to: "/products/new", key: "P", page: "products" },
+  { label: "Record order", to: "/orders#record-order", key: "O", page: "orders" },
+  { label: "Add staff", to: "/staff#add-staff", key: "S", page: "staff" },
+];

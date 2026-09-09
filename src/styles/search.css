@@ -4,24 +4,50 @@
 .search:focus-within .search__kbd { display: none; }
 
 /* Anchored under the box and scaling from it, the way a popover should. */
-.search-panel { position: absolute; top: calc(100% + 8px); right: 0; width: 400px; max-height: 440px; overflow: auto; background: var(--paper); border-radius: 12px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05); padding: 6px; z-index: 20; transform-origin: top right; transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out); }
+.search-panel { position: absolute; top: calc(100% + 8px); right: 0; width: 460px; max-height: 560px; overflow: auto; background: var(--paper); border-radius: 14px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05); padding: 8px; z-index: 20; transform-origin: top right; transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out); }
 @starting-style { .search-panel { opacity: 0; transform: scale(0.98) translateY(-2px); } }
-.search-panel__group + .search-panel__group { margin-top: 4px; border-top: 1px solid rgba(0, 0, 0, 0.05); padding-top: 4px; }
-.search-panel__label { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
-.search-panel__label button { border: 0; background: none; color: var(--text-2); font: 500 11px var(--font); cursor: pointer; padding: 2px 6px; border-radius: 6px; text-transform: none; letter-spacing: 0; }
-.search-hit { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 8px; cursor: pointer; color: var(--text); }
-.search-hit.is-active { background: var(--canvas); }
-.search-hit__title { font-weight: 600; font-size: 13px; }
-.search-hit__sub { font-size: 12px; color: var(--text-2); }
+
+/* What to look through: chips with a cross each, and More for the ones left out. */
+.search-types { padding: 6px 6px 10px; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+.search-types__label { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 8px; }
+.search-types__row { display: flex; flex-wrap: wrap; gap: 6px; position: relative; }
+.search-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--canvas); border-radius: var(--r-pill); padding: 5px 8px 5px 10px; font: 600 12px/1.2 var(--font); color: var(--text); border: 0; }
+.search-chip > .anticon:first-child { font-size: 12px; color: var(--text-2); }
+.search-chip button { border: 0; background: none; color: var(--muted); font-size: 9px; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; display: grid; place-items: center; padding: 0; transition: background-color 120ms ease, color 120ms ease; }
+.search-chip--more { cursor: pointer; color: var(--text-2); padding-right: 10px; transition: transform 160ms var(--ease-out); }
+.search-chip--more .anticon { font-size: 10px; }
+.search-chip--more:active { transform: scale(0.97); }
+
+.search-panel__group { padding-top: 4px; }
+.search-panel__group + .search-panel__group { margin-top: 2px; border-top: 1px solid rgba(0, 0, 0, 0.05); }
+.search-panel__label { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px 4px; font-size: 11.5px; font-weight: 500; color: var(--muted); }
+.search-panel__label b { margin-left: 6px; color: var(--text); font-weight: 600; }
+.search-panel__label button { border: 0; background: none; color: var(--text-2); font: 500 11px var(--font); cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+
+/* A row: the mark, the words, then the figure or the keys on the right. */
+.search-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; text-align: left; border: 0; background: none; padding: 7px 10px; border-radius: 8px; cursor: pointer; color: var(--text); }
+.search-row.is-active { background: var(--canvas); }
+.search-row__avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--lavender); color: var(--lavender-ink); display: grid; place-items: center; font-size: 10.5px; font-weight: 700; }
+.search-row__icon { width: 28px; height: 28px; border-radius: 8px; background: var(--canvas); color: var(--text-2); display: grid; place-items: center; font-size: 13px; }
+.search-row.is-active .search-row__icon { background: var(--paper); }
+.search-row__text { display: flex; gap: 8px; align-items: baseline; min-width: 0; font-size: 13px; }
+.search-row__text b { font-weight: 600; white-space: nowrap; }
+.search-row__text span { color: var(--text-2); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-row__stat { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.search-row__kbd { display: flex; gap: 4px; }
+.search-row__kbd kbd { font: 500 11px/1 var(--font); color: var(--text-2); background: var(--canvas); border-radius: 6px; padding: 4px 6px; }
+.search-row.is-active .search-row__kbd kbd { background: var(--paper); }
 .search-panel__empty { padding: 14px 12px; color: var(--text-2); font-size: 13px; }
 
 @media (hover: hover) and (pointer: fine) {
   .search-panel__label button:hover { background: rgba(0, 0, 0, 0.05); color: var(--text); }
+  .search-chip button:hover { background: rgba(0, 0, 0, 0.08); color: var(--text); }
 }
 @media (prefers-reduced-motion: reduce) {
   .search-panel { transition: opacity 120ms ease; transform: none !important; }
+  .search-chip--more:active { transform: none; }
 }
 @media (max-width: 1100px) {
   .search { width: 220px; }
-  .search-panel { width: 340px; }
+  .search-panel { width: 360px; }
 }
