@@ -3,4 +3,5 @@ export const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 export const PHOTO_ACCEPT = "image/png,image/jpeg,image/webp";
 
 /** Null when the photo fits; the sentence the agent reads otherwise. */
-export const photoRefusal = (bytes: number) => (bytes <= MAX_PHOTO_BYTES ? null : `That photo is ${(bytes / (1024 * 1024)).toFixed(1)} MB; the most is 5 MB.`);
+// Rounded up, so a photo a byte over never reads as exactly 5 MB.
+export const photoRefusal = (bytes: number) => (bytes <= MAX_PHOTO_BYTES ? null : `That photo is ${(Math.ceil((bytes / (1024 * 1024)) * 10) / 10).toFixed(1)} MB; the most is 5 MB.`);
