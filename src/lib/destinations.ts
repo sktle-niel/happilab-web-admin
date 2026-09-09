@@ -19,7 +19,7 @@ export const DESTINATIONS: Destination[] = [
   { title: "Cash-outs chart", crumb: "Dashboard", to: "/#cash-outs-chart", keywords: "monthly weekly sent average time" },
   { title: "Members", crumb: "Page", to: "/members", keywords: "people referrals codes status joined" },
   { title: "Products", crumb: "Page", to: "/products", keywords: "catalogue price badge stores live" },
-  { title: "Add product", crumb: "Products", to: "/products#add-product", keywords: "new product" },
+  { title: "Add product", crumb: "Products", to: "/products/new", keywords: "new product" },
   { title: "Orders", crumb: "Page", to: "/orders", keywords: "sales references buyers" },
   { title: "Record order", crumb: "Orders", to: "/orders#record-order", keywords: "new order add" },
   { title: "Cash-outs", crumb: "Page", to: "/cash-outs", keywords: "requests approve review processing sent failed gcash maya payout" },

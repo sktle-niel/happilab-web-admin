@@ -18,6 +18,7 @@ import { Verify } from "./pages/login/Verify";
 import { MembersList } from "./pages/members/MembersList";
 import { NoAccess } from "./pages/NoAccess";
 import { OrdersList } from "./pages/orders/OrdersList";
+import { ProductEditor } from "./pages/products/ProductEditor";
 import { ProductsList } from "./pages/products/ProductsList";
 import { SettingsPage } from "./pages/settings/SettingsPage";
 import { StaffList } from "./pages/staff/StaffList";
@@ -44,6 +45,13 @@ const SCREENS: Record<PageKey, ReactNode> = {
   audit: <AuditList />,
   settings: <SettingsPage />,
 };
+
+/** A page only for accounts that may open it. */
+const guarded = (page: PageKey, screen: ReactNode) => (
+  <CanAccess resource={page} action="list" fallback={<NoAccess />}>
+    {screen}
+  </CanAccess>
+);
 
 /** Sonner in the page's clothes: the card shadow, the card font, one radius. */
 const TOAST_STYLE = {
@@ -80,21 +88,12 @@ export function App() {
                   key={page.key}
                   index={page.key === "dashboard"}
                   path={page.key === "dashboard" ? undefined : page.path}
-                  element={
-                    <CanAccess resource={page.key} action="list" fallback={<NoAccess />}>
-                      {SCREENS[page.key]}
-                    </CanAccess>
-                  }
+                  element={guarded(page.key, SCREENS[page.key])}
                 />
               ))}
-              <Route
-                path="/support/:id"
-                element={
-                  <CanAccess resource="support" action="list" fallback={<NoAccess />}>
-                    <SupportPage />
-                  </CanAccess>
-                }
-              />
+              <Route path="/products/new" element={guarded("products", <ProductEditor />)} />
+              <Route path="/products/:id/edit" element={guarded("products", <ProductEditor />)} />
+              <Route path="/support/:id" element={guarded("support", <SupportPage />)} />
             </Route>
             <Route
               element={
