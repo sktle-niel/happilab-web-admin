@@ -1,17 +1,45 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useNavigate } from "react-router";
-import { searchAll } from "../lib/search";
+import { canOpen, type PageKey } from "../lib/access";
+import { QUICK_ACTIONS } from "../lib/destinations";
+import { readRecent, remember } from "../lib/recentSearches";
+import { HIT_TYPES, searchAll, type Hit, type HitType } from "../lib/search";
+import { useAttention } from "../lib/useAttention";
+import { useStaffSession } from "../providers/session";
+import { SearchPanel, type Section } from "./SearchPanel";
+import type { Row } from "./SearchRow";
 
-/** The top bar's search: results as you type, arrows and Enter to choose, `/` or Ctrl+K to get here from anywhere. */
+const ALL_TYPES = HIT_TYPES.map((t) => t.type);
+const hitRow = (hit: Hit): Row => ({ key: hit.key, title: hit.title, subtitle: hit.subtitle, to: hit.to, icon: hit.type, hit, ...(hit.stat && { stat: hit.stat }) });
+
+/** With nothing typed: what was opened lately, what staff come to do, and what is waiting. */
+function restingSections(recent: Hit[], pages: readonly PageKey[] | undefined, pendingCashOuts: number, queued: number): Section[] {
+  const may = (page: PageKey) => canOpen(pages, page);
+  const actions: Row[] = QUICK_ACTIONS.filter((a) => may(a.page)).map((a) => ({ key: `action:${a.to}`, title: a.label, to: a.to, kbd: a.key, icon: "plus" }));
+  const waiting: Row[] = [
+    ...(may("cash-outs") ? [{ key: "wait:cash-outs", title: "Cash-outs to review", to: "/cash-outs", stat: String(pendingCashOuts), icon: "cash-outs" as const }] : []),
+    ...(may("support") ? [{ key: "wait:support", title: "Members in the support queue", to: "/support", stat: String(queued), icon: "support" as const }] : []),
+  ];
+  return [
+    ...(recent.length > 0 ? [{ label: "Recent", count: recent.length, rows: recent.map(hitRow) }] : []),
+    ...(actions.length > 0 ? [{ label: "Quick actions", rows: actions }] : []),
+    ...(waiting.length > 0 ? [{ label: "Waiting on you", rows: waiting }] : []),
+  ];
+}
+
+/** The top bar's search: `/` or Ctrl+K from anywhere, arrows and Enter to choose, Alt and a letter for a quick action. */
 export function GlobalSearch() {
   const navigate = useNavigate();
+  const { identity } = useStaffSession();
+  const pages = identity?.pages;
+  const { pendingCashOuts, queued } = useAttention();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const groups = useMemo(() => searchAll(query), [query]);
-  const flat = useMemo(() => groups.flatMap((group) => group.hits), [groups]);
+  const [types, setTypes] = useState<HitType[]>(ALL_TYPES);
+  const [recent, setRecent] = useState<Hit[]>(readRecent);
 
   // A keyboard action, so it focuses at once, with no animation of its own.
   useEffect(() => {
@@ -28,30 +56,53 @@ export function GlobalSearch() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const go = (to: string) => {
+  const term = query.trim();
+  const sections = useMemo<Section[]>(
+    () => (term.length >= 2 ? searchAll(term, types).map((group) => ({ label: group.label, rows: group.hits.map(hitRow), ...(group.to && { seeAll: group.to }) })) : restingSections(recent, pages, pendingCashOuts, queued)),
+    [term, types, recent, pages, pendingCashOuts, queued],
+  );
+  const flat = useMemo(() => sections.flatMap((section) => section.rows), [sections]);
+
+  const leave = () => {
     setOpen(false);
     setQuery("");
     inputRef.current?.blur();
+  };
+  const pick = (row: Row) => {
+    if (row.hit) setRecent(remember(row.hit));
+    leave();
+    navigate(row.to);
+  };
+  const seeAll = (to: string) => {
+    leave();
     navigate(to);
+  };
+  const changeTypes = (next: HitType[]) => {
+    setTypes(next);
+    setActive(0);
   };
 
   const onKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "ArrowDown") {
+    if (event.altKey && event.key.length === 1) {
+      const action = flat.find((row) => row.kbd?.toLowerCase() === event.key.toLowerCase());
+      if (action) {
+        event.preventDefault();
+        pick(action);
+      }
+    } else if (event.key === "ArrowDown") {
       event.preventDefault();
       setActive((i) => Math.min(i + 1, flat.length - 1));
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActive((i) => Math.max(i - 1, 0));
     } else if (event.key === "Enter") {
-      const to = flat[active]?.to ?? flat[0]?.to;
-      if (to) go(to);
+      const row = flat[active] ?? flat[0];
+      if (row) pick(row);
     } else if (event.key === "Escape") {
-      setOpen(false);
-      inputRef.current?.blur();
+      leave();
     }
   };
 
-  const showing = open && query.trim().length >= 2;
   return (
     <div className="search-wrap">
       <label className="search">
@@ -59,7 +110,7 @@ export function GlobalSearch() {
         <input
           ref={inputRef}
           value={query}
-          placeholder="Search members, orders, references…"
+          placeholder="Search actions, members, orders, pages…"
           aria-label="Search"
           onChange={(event) => {
             setQuery(event.target.value);
@@ -72,36 +123,7 @@ export function GlobalSearch() {
         />
         <kbd className="search__kbd">/</kbd>
       </label>
-      {showing && (
-        <div className="search-panel" role="listbox" onMouseDown={(event) => event.preventDefault()}>
-          {groups.length === 0 && <div className="search-panel__empty">Nothing matches “{query.trim()}”.</div>}
-          {groups.map((group) => (
-            <div key={group.label} className="search-panel__group">
-              <div className="search-panel__label">
-                {group.label}
-                {group.to && <button type="button" onClick={() => go(group.to!)}>See all</button>}
-              </div>
-              {group.hits.map((hit) => {
-                const index = flat.indexOf(hit);
-                return (
-                  <button
-                    type="button"
-                    key={hit.key}
-                    role="option"
-                    aria-selected={index === active}
-                    className={`search-hit${index === active ? " is-active" : ""}`}
-                    onMouseEnter={() => setActive(index)}
-                    onClick={() => go(hit.to)}
-                  >
-                    <span className="search-hit__title">{hit.title}</span>
-                    <span className="search-hit__sub">{hit.subtitle}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      )}
+      {open && <SearchPanel query={term} types={types} sections={sections} flat={flat} active={active} onTypes={changeTypes} onHover={setActive} onPick={pick} onSeeAll={seeAll} />}
     </div>
   );
 }

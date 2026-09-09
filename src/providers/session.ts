@@ -1,17 +1,26 @@
-import { useGetIdentity, useLogin, useLogout } from "@refinedev/core";
+import { useForgotPassword, useGetIdentity, useLogin, useLogout, useUpdatePassword } from "@refinedev/core";
+import type { LoginParams } from "./fakeAuthProvider";
 
-export type StaffIdentity = { id: string; name: string; email: string; role: "owner" | "admin" | "support" };
-type Credentials = { email: string; password: string };
+import type { PageKey, StaffRole } from "../lib/access";
 
-/** The signed-in staff account and the two ways in and out, so no screen imports Refine's auth hooks directly. */
+export type StaffIdentity = { id: string; name: string; email: string; role: StaffRole; pages: PageKey[] };
+
+/** The signed-in staff account and every way in and out, so no screen imports Refine's auth hooks directly. */
 export function useStaffSession() {
   const { data: identity } = useGetIdentity<StaffIdentity>();
-  const { mutate: login, isPending } = useLogin<Credentials>();
+  // Refine redirects on success and raises a notification on failure; Sonner shows it.
+  const { mutate: login, isPending } = useLogin<LoginParams>();
   const { mutate: logout } = useLogout();
+  const { mutate: forgot, isPending: isRequesting } = useForgotPassword<{ email: string }>();
+  const { mutate: update, isPending: isUpdating } = useUpdatePassword<{ password: string; confirmPassword: string; token: string }>();
   return {
     identity,
-    isSigningIn: isPending,
-    signIn: (credentials: Credentials) => login(credentials),
+    isBusy: isPending || isRequesting || isUpdating,
+    requestReset: (email: string) => forgot({ email }),
+    updatePassword: (password: string, confirmPassword: string, token: string) => update({ password, confirmPassword, token }),
+    signInWithPassword: (email: string, password: string) => login({ method: "password", email, password }),
+    signInWithGoogle: () => login({ method: "google" }),
+    verify: (code: string) => login({ method: "otp", code }),
     signOut: () => logout(),
   };
 }

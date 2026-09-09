@@ -1,7 +1,11 @@
 import { MoreOutlined } from "@ant-design/icons";
 import { Dropdown } from "antd";
-import { toast } from "sonner";
 import type { ReactNode } from "react";
+import { useNavigate } from "react-router";
+import { downloadCsv } from "../lib/csv";
+
+/** Where a card's figure comes from: the page that explains it, and the rows behind it for a spreadsheet. */
+export type CardMenuProps = { report: string; csv?: () => { name: string; rows: Record<string, unknown>[] } };
 
 type CardProps = {
   title: string;
@@ -10,24 +14,23 @@ type CardProps = {
   dark?: boolean;
   className?: string;
   action?: ReactNode;
+  menu?: CardMenuProps;
   /** The id the search lands on, as `data-spot`. */
   spot?: string;
 };
 
-/** The card's own menu: the two things every figure on the dashboard can do. */
-function CardMenu({ title }: { title: string }) {
+function CardMenu({ title, report, csv }: CardMenuProps & { title: string }) {
+  const navigate = useNavigate();
+  const items = [{ key: "report", label: "Open report" }, ...(csv ? [{ key: "export", label: "Export as CSV" }] : [])];
+  const act = ({ key }: { key: string }) => {
+    if (key === "report") navigate(report);
+    else if (csv) {
+      const file = csv();
+      downloadCsv(file.name, file.rows);
+    }
+  };
   return (
-    <Dropdown
-      trigger={["click"]}
-      placement="bottomRight"
-      menu={{
-        items: [
-          { key: "report", label: "Open report" },
-          { key: "export", label: "Export as CSV" },
-        ],
-        onClick: ({ key }) => toast(`${key === "report" ? "The report" : "The export"} for ${title} lands with the API.`),
-      }}
-    >
+    <Dropdown trigger={["click"]} placement="bottomRight" menu={{ items, onClick: act }}>
       <button type="button" className="card__kebab" aria-label={`${title} menu`}>
         <MoreOutlined />
       </button>
@@ -36,13 +39,13 @@ function CardMenu({ title }: { title: string }) {
 }
 
 /** The dashboard's card: an icon in a circle, a title, a menu or an action, then whatever it holds. */
-export function Card({ title, icon, children, dark = false, className = "", action, spot }: CardProps) {
+export function Card({ title, icon, children, dark = false, className = "", action, menu, spot }: CardProps) {
   return (
     <article className={`card ${dark ? "card--dark" : ""} ${className}`.trim()} data-spot={spot}>
       <header className="card__head">
         <span className="card__icon">{icon}</span>
         <span className="card__title">{title}</span>
-        {action ?? <CardMenu title={title} />}
+        {action ?? (menu && <CardMenu title={title} {...menu} />)}
       </header>
       {children}
     </article>

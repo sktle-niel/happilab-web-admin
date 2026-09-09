@@ -14,6 +14,7 @@ export type CashOut = {
   status: CashOutStatus;
   requestedAt: string;
   sentAt: string | null;
+  failureReason: string | null;
 };
 
 export type Order = {
@@ -33,7 +34,9 @@ export type Order = {
 export type AuditEntry = { id: string; at: string; actor: string; action: string; entity: string; ip: string; detail: string };
 
 const random = seeded(88);
-const isoDaysAgo = (days: number, hour = 9) => new Date(Date.UTC(2026, 8, 8, hour) - days * 86_400_000).toISOString();
+/** Anchored on today, so the tables always read as this week's programme. */
+const TODAY = new Date(new Date().toDateString()).getTime();
+const isoDaysAgo = (days: number, hour = 9) => new Date(TODAY + hour * 3_600_000 - days * 86_400_000).toISOString();
 const active = members.filter((m) => m.status === "active");
 
 const STATUSES: CashOutStatus[] = ["requested", "requested", "review", "processing", "sent", "sent", "sent", "failed"];
@@ -51,8 +54,9 @@ export const cashOuts: CashOut[] = Array.from({ length: 58 }, (_, i) => {
     numberLast4: String(random.int(1000, 9999)),
     points: random.pick([1000, 1000, 1500, 2000, 2500, 3000, 5000]),
     status,
-    requestedAt: isoDaysAgo(days, random.int(7, 21)),
+    requestedAt: isoDaysAgo(days, random.int(7, 11)),
     sentAt: status === "sent" ? isoDaysAgo(Math.max(0, days - random.int(1, 3)), 14) : null,
+    failureReason: status === "failed" ? "Wallet number not registered" : null,
   };
 });
 
@@ -72,7 +76,8 @@ export const orders: Order[] = Array.from({ length: 140 }, (_, i) => {
     totalCentavos: product.priceCentavos * quantity,
     pointsAwarded: random.int(product.pointsMin, product.pointsMax) * quantity,
     status: random.next() < 0.9 ? "confirmed" : random.pick(["placed", "cancelled", "refunded"] as const),
-    placedAt: isoDaysAgo(random.int(0, 180), random.int(8, 22)),
+    // A handful land today, so the dashboard has a day to show before anything is recorded.
+    placedAt: isoDaysAgo(i < 6 ? 0 : random.int(1, 180), random.int(8, 12)),
   };
 });
 
@@ -89,5 +94,6 @@ const ACTORS = ["Niel Ladica", "Maria Santos", "Paolo Reyes"];
 
 export const audit: AuditEntry[] = Array.from({ length: 80 }, (_, i) => {
   const [action, entity, detail] = random.pick(ACTIONS);
-  return { id: `a${String(i + 1).padStart(3, "0")}`, at: isoDaysAgo(Math.floor(i / 4), 18 - (i % 4) * 3), actor: random.pick(ACTORS), action, entity, ip: `203.0.113.${random.int(2, 250)}`, detail };
+  // From yesterday back, so what staff do today always sits above the seed.
+  return { id: `a${String(i + 1).padStart(3, "0")}`, at: isoDaysAgo(Math.floor(i / 4) + 1, 18 - (i % 4) * 3), actor: random.pick(ACTORS), action, entity, ip: `203.0.113.${random.int(2, 250)}`, detail };
 });

@@ -1,37 +1,57 @@
-import { Authenticated, Refine } from "@refinedev/core";
+import { Authenticated, CanAccess, Refine } from "@refinedev/core";
 import routerProvider, { CatchAllNavigate, NavigateToResource } from "@refinedev/react-router";
 import { ConfigProvider } from "antd";
-import { Toaster } from "sonner";
+import type { ReactNode } from "react";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
+import { Toaster } from "sonner";
 import { AppFrame } from "./layout/AppFrame";
+import { PAGES, type PageKey } from "./lib/access";
+import { previewing } from "./lib/env";
 import { AuditList } from "./pages/audit/AuditList";
 import { CashOutsList } from "./pages/cashouts/CashOutsList";
 import { ContentPage } from "./pages/content/ContentPage";
 import { Dashboard } from "./pages/dashboard/Dashboard";
+import { Forgot } from "./pages/login/Forgot";
 import { Login } from "./pages/login/Login";
+import { Reset } from "./pages/login/Reset";
+import { Verify } from "./pages/login/Verify";
 import { MembersList } from "./pages/members/MembersList";
+import { NoAccess } from "./pages/NoAccess";
 import { OrdersList } from "./pages/orders/OrdersList";
+import { ProductEditor } from "./pages/products/ProductEditor";
 import { ProductsList } from "./pages/products/ProductsList";
 import { SettingsPage } from "./pages/settings/SettingsPage";
 import { StaffList } from "./pages/staff/StaffList";
 import { SupportPage } from "./pages/support/SupportPage";
+import { accessControl } from "./providers/accessControl";
 import { fakeAuthProvider } from "./providers/fakeAuthProvider";
 import { fakeDataProvider } from "./providers/fakeDataProvider";
+import { sonnerNotifications } from "./providers/notifications";
 import { theme } from "./theme";
 
-/** Every resource the admin manages; the paths match the sidebar. */
-const RESOURCES = [
-  { name: "dashboard", list: "/" },
-  { name: "members", list: "/members" },
-  { name: "products", list: "/products" },
-  { name: "orders", list: "/orders" },
-  { name: "cash-outs", list: "/cash-outs" },
-  { name: "posts", list: "/content" },
-  { name: "support", list: "/support" },
-  { name: "staff", list: "/staff" },
-  { name: "audit", list: "/audit" },
-  { name: "settings", list: "/settings" },
-];
+/** Every page the admin has, as a Refine resource; the paths match the sidebar. */
+const RESOURCES = PAGES.map((page) => ({ name: page.key, list: page.path }));
+
+/** The screen behind each page key; the route opens it only for accounts that may. */
+const SCREENS: Record<PageKey, ReactNode> = {
+  dashboard: <Dashboard />,
+  members: <MembersList />,
+  products: <ProductsList />,
+  orders: <OrdersList />,
+  "cash-outs": <CashOutsList />,
+  content: <ContentPage />,
+  support: <SupportPage />,
+  staff: <StaffList />,
+  audit: <AuditList />,
+  settings: <SettingsPage />,
+};
+
+/** A page only for accounts that may open it. */
+const guarded = (page: PageKey, screen: ReactNode) => (
+  <CanAccess resource={page} action="list" fallback={<NoAccess />}>
+    {screen}
+  </CanAccess>
+);
 
 /** Sonner in the page's clothes: the card shadow, the card font, one radius. */
 const TOAST_STYLE = {
@@ -46,43 +66,54 @@ export function App() {
   return (
     <BrowserRouter>
       <ConfigProvider theme={theme}>
-          <Refine
-            dataProvider={fakeDataProvider}
-            authProvider={fakeAuthProvider}
-            routerProvider={routerProvider}
-            resources={RESOURCES}
-            options={{ syncWithLocation: false, warnWhenUnsavedChanges: false, disableTelemetry: true }}
-          >
-            <Routes>
-              <Route
-                element={
-                  <Authenticated key="signed-in" fallback={<CatchAllNavigate to="/login" />}>
-                    <AppFrame />
-                  </Authenticated>
-                }
-              >
-                <Route index element={<Dashboard />} />
-                <Route path="/members" element={<MembersList />} />
-                <Route path="/products" element={<ProductsList />} />
-                <Route path="/orders" element={<OrdersList />} />
-                <Route path="/cash-outs" element={<CashOutsList />} />
-                <Route path="/content" element={<ContentPage />} />
-                <Route path="/support" element={<SupportPage />} />
-                <Route path="/staff" element={<StaffList />} />
-                <Route path="/audit" element={<AuditList />} />
-                <Route path="/settings" element={<SettingsPage />} />
-              </Route>
-              <Route
-                element={
+        <Refine
+          dataProvider={fakeDataProvider}
+          authProvider={fakeAuthProvider}
+          accessControlProvider={accessControl}
+          notificationProvider={sonnerNotifications}
+          routerProvider={routerProvider}
+          resources={RESOURCES}
+          options={{ syncWithLocation: false, warnWhenUnsavedChanges: false, disableTelemetry: true }}
+        >
+          <Routes>
+            <Route
+              element={
+                <Authenticated key="signed-in" fallback={<CatchAllNavigate to="/login" />}>
+                  <AppFrame />
+                </Authenticated>
+              }
+            >
+              {PAGES.map((page) => (
+                <Route
+                  key={page.key}
+                  index={page.key === "dashboard"}
+                  path={page.key === "dashboard" ? undefined : page.path}
+                  element={guarded(page.key, SCREENS[page.key])}
+                />
+              ))}
+              <Route path="/products/new" element={guarded("products", <ProductEditor />)} />
+              <Route path="/products/:id/edit" element={guarded("products", <ProductEditor />)} />
+              <Route path="/support/tickets/:ticketId" element={guarded("support", <SupportPage />)} />
+              <Route path="/support/:id" element={guarded("support", <SupportPage />)} />
+            </Route>
+            <Route
+              element={
+                previewing ? (
+                  <Outlet />
+                ) : (
                   <Authenticated key="signed-out" fallback={<Outlet />}>
                     <NavigateToResource resource="dashboard" />
                   </Authenticated>
-                }
-              >
-                <Route path="/login" element={<Login />} />
-              </Route>
-            </Routes>
-          </Refine>
+                )
+              }
+            >
+              <Route path="/login" element={<Login />} />
+              <Route path="/login/verify" element={<Verify />} />
+              <Route path="/login/forgot" element={<Forgot />} />
+              <Route path="/login/reset" element={<Reset />} />
+            </Route>
+          </Routes>
+        </Refine>
         <Toaster position="bottom-right" toastOptions={{ style: TOAST_STYLE }} />
       </ConfigProvider>
     </BrowserRouter>

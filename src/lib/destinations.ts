@@ -1,3 +1,5 @@
+import type { PageKey } from "./access";
+
 /**
  * Every place the top bar can take you: pages, the cards and tabs on
  * them, and the settings fields. `to` may carry a hash naming the
@@ -19,7 +21,7 @@ export const DESTINATIONS: Destination[] = [
   { title: "Cash-outs chart", crumb: "Dashboard", to: "/#cash-outs-chart", keywords: "monthly weekly sent average time" },
   { title: "Members", crumb: "Page", to: "/members", keywords: "people referrals codes status joined" },
   { title: "Products", crumb: "Page", to: "/products", keywords: "catalogue price badge stores live" },
-  { title: "Add product", crumb: "Products", to: "/products#add-product", keywords: "new product" },
+  { title: "Add product", crumb: "Products", to: "/products/new", keywords: "new product" },
   { title: "Orders", crumb: "Page", to: "/orders", keywords: "sales references buyers" },
   { title: "Record order", crumb: "Orders", to: "/orders#record-order", keywords: "new order add" },
   { title: "Cash-outs", crumb: "Page", to: "/cash-outs", keywords: "requests approve review processing sent failed gcash maya payout" },
@@ -30,6 +32,8 @@ export const DESTINATIONS: Destination[] = [
   { title: "Support desk", crumb: "Page", to: "/support", keywords: "queue agents chat" },
   { title: "In line", crumb: "Support", to: "/support#in-line", keywords: "queue waiting" },
   { title: "On the desk", crumb: "Support", to: "/support#on-the-desk", keywords: "agents online" },
+  { title: "Chat history", crumb: "Support", to: "/support?view=history", keywords: "ended resolved past conversations" },
+  { title: "Tickets", crumb: "Support", to: "/support?view=tickets", keywords: "account issues follow up open done" },
   { title: "Staff", crumb: "Page", to: "/staff", keywords: "owner admin support roles accounts" },
   { title: "Add staff", crumb: "Staff", to: "/staff#add-staff", keywords: "invite new account" },
   { title: "Audit log", crumb: "Page", to: "/audit", keywords: "actions history who did what" },
@@ -69,3 +73,11 @@ export function findDestinations(query: string, limit = 6): Destination[] {
     .slice(0, limit)
     .map(({ d }) => d);
 }
+
+/** The things staff most often come to do, one key each while the search is open, shown only to accounts that may. */
+export type QuickAction = { label: string; to: string; key: string; page: PageKey };
+export const QUICK_ACTIONS: QuickAction[] = [
+  { label: "Add product", to: "/products/new", key: "P", page: "products" },
+  { label: "Record order", to: "/orders#record-order", key: "O", page: "orders" },
+  { label: "Add staff", to: "/staff#add-staff", key: "S", page: "staff" },
+];

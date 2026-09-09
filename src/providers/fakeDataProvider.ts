@@ -1,16 +1,23 @@
 import type { CrudFilter, CrudSort, DataProvider } from "@refinedev/core";
-import { faqs, posts, products } from "../data/fake/catalogue";
+import { logAudit, verbFor } from "../data/fake/audit";
+import { faqs, posts, products, terms } from "../data/fake/catalogue";
+import { afterCreate, afterUpdate } from "../data/fake/effects";
 import { audit, cashOuts, orders } from "../data/fake/money";
 import { members, staff } from "../data/fake/people";
+import { tickets } from "../data/fake/tickets";
 
 /**
  * Refine's data contract over the bundled tables: paging, sorting and the
  * filters the lists use, in memory, with writes remembered for the tab.
- * The API provider will answer the same calls over HTTPS.
+ * Every write leaves an audit line and carries the side effects the API
+ * would, so the pages stay as dumb as they will be over HTTPS.
  */
 type Row = { id: string } & Record<string, unknown>;
 
-const tables: Record<string, Row[]> = { members, products, orders, "cash-outs": cashOuts, posts, faqs, staff, audit };
+const tables: Record<string, Row[]> = { members, products, orders, "cash-outs": cashOuts, posts, faqs, terms, staff, audit, tickets };
+
+/** Resources the API deletes softly: the row stays, stamped `deletedAt`, and a PATCH can bring it back. */
+const SOFT_DELETE = new Set(["products"]);
 
 const rows = (resource: string): Row[] => {
   const table = tables[resource];
@@ -35,6 +42,10 @@ function matches(row: Row, filter: CrudFilter): boolean {
       return Array.isArray(wanted) && wanted.includes(value);
     case "contains":
       return String(value ?? "").toLowerCase().includes(String(wanted ?? "").toLowerCase());
+    case "null":
+      return value === null || value === undefined;
+    case "nnull":
+      return value !== null && value !== undefined;
     default:
       return true;
   }
@@ -77,19 +88,33 @@ export const fakeDataProvider: DataProvider = {
   create: async ({ resource, variables }) => {
     const row = { id: `${resource.slice(0, 1)}${Date.now()}`, ...(variables as object) } as Row;
     rows(resource).unshift(row);
+    afterCreate(resource, row);
+    logAudit(resource, "created", row);
     return { data: row as never };
   },
 
   update: async ({ resource, id, variables }) => {
     const table = rows(resource);
     const index = find(resource, id);
-    const row = { ...table[index], ...(variables as object) } as Row;
+    const before = table[index]!;
+    const row = { ...before, ...(variables as object) } as Row;
     table[index] = row;
+    afterUpdate(resource, before, row);
+    logAudit(resource, verbFor(variables as Record<string, unknown>), row);
     return { data: row as never };
   },
 
   deleteOne: async ({ resource, id }) => {
-    const [row] = rows(resource).splice(find(resource, id), 1);
+    const table = rows(resource);
+    const index = find(resource, id);
+    if (SOFT_DELETE.has(resource)) {
+      const row = { ...table[index], deletedAt: new Date().toISOString() } as Row;
+      table[index] = row;
+      logAudit(resource, "deleted", row);
+      return { data: row as never };
+    }
+    const [row] = table.splice(index, 1);
+    logAudit(resource, "deleted", row!);
     return { data: row as never };
   },
 };

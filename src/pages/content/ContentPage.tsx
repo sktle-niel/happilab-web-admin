@@ -1,57 +1,42 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { useTable } from "@refinedev/antd";
-import { Button, Table, Tabs } from "antd";
-import { toast } from "sonner";
+import { Button, Tabs } from "antd";
+import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { ListCard } from "../../components/ListCard";
 import { Spot } from "../../components/Spot";
-import { StatusTag } from "../../components/StatusTag";
-import type { Faq, Post } from "../../data/fake/catalogue";
-import { dayLabel } from "../../lib/format";
+import type { Faq, Post, TermsSection } from "../../data/fake/catalogue";
+import { Faqs, Posts, Terms, type Editing } from "./ContentTables";
 
-function Posts() {
-  const { tableProps } = useTable<Post>({ resource: "posts", pagination: { mode: "off" }, sorters: { initial: [{ field: "publishedAt", order: "desc" }] } });
-  return (
-    <Table<Post> {...tableProps} rowKey="id" pagination={false}>
-      <Table.Column<Post> title="Post" dataIndex="body" render={(v: string) => <div style={{ maxWidth: 520 }}>{v}</div>} />
-      <Table.Column<Post> title="Media" dataIndex="media" render={(v: string) => <span className="cell-muted">{v}</span>} />
-      <Table.Column<Post> title="Likes" dataIndex="likes" />
-      <Table.Column<Post> title="Comments" dataIndex="comments" />
-      <Table.Column title="Status" dataIndex="status" render={(s: string) => <StatusTag status={s} />} />
-      <Table.Column<Post> title="Published" dataIndex="publishedAt" render={(v: string) => <span className="cell-muted">{dayLabel(new Date(v))}</span>} />
-    </Table>
-  );
-}
+type Tab = "posts" | "faqs" | "terms";
+const TABS: { key: Tab; label: string; add: string }[] = [
+  { key: "posts", label: "Feed posts", add: "New post" },
+  { key: "faqs", label: "FAQs", add: "Add FAQ" },
+  { key: "terms", label: "Terms", add: "Add section" },
+];
 
-function Faqs() {
-  const { tableProps } = useTable<Faq>({ resource: "faqs", pagination: { mode: "off" }, sorters: { initial: [{ field: "position", order: "asc" }] } });
-  return (
-    <Table<Faq> {...tableProps} rowKey="id" pagination={false}>
-      <Table.Column<Faq> title="#" dataIndex="position" width={60} />
-      <Table.Column<Faq> title="Question" dataIndex="question" render={(v: string) => <span className="cell-primary">{v}</span>} />
-      <Table.Column<Faq> title="Answer" dataIndex="answer" />
-      <Table.Column<Faq> title="Status" dataIndex="isActive" render={(v: boolean) => <StatusTag status={v ? "published" : "draft"} />} />
-    </Table>
-  );
-}
-
+/** Three tabs and one Add button that follows the tab; the address keeps the tab so the search can land on it. */
 export function ContentPage() {
-  const [params] = useSearchParams();
-  const tab = params.get("tab") ?? "posts";
+  const [params, setParams] = useSearchParams();
+  const tab: Tab = TABS.find((t) => t.key === params.get("tab"))?.key ?? "posts";
+  const [post, setPost] = useState<Editing<Post>>(undefined);
+  const [faq, setFaq] = useState<Editing<Faq>>(undefined);
+  const [section, setSection] = useState<Editing<TermsSection>>(undefined);
+  const openNew: Record<Tab, () => void> = { posts: () => setPost(null), faqs: () => setFaq(null), terms: () => setSection(null) };
+  const current = TABS.find((t) => t.key === tab) ?? TABS[0]!;
   return (
     <ListCard
       title="Content"
-      subtitle="What the feed says, and the help copy members read."
-      aside={<Button type="primary" icon={<PlusOutlined />} onClick={() => toast("Writing posts lands with the API.")}>New post</Button>}
+      subtitle="What the feed says, the help copy members read, and the terms they joined under."
+      aside={<Button type="primary" icon={<PlusOutlined />} onClick={openNew[tab]}>{current.add}</Button>}
     >
       <Tabs
-        key={tab}
-        defaultActiveKey={tab}
+        activeKey={tab}
+        onChange={(key) => setParams({ tab: key }, { replace: true })}
         style={{ padding: "0 12px" }}
         items={[
-          { key: "posts", label: "Feed posts", children: <Spot id="posts"><Posts /></Spot> },
-          { key: "faqs", label: "FAQs", children: <Spot id="faqs"><Faqs /></Spot> },
-          { key: "terms", label: "Terms", children: <Spot id="terms"><p className="cell-muted" style={{ padding: 12 }}>Terms sections are edited in Settings once the API is connected.</p></Spot> },
+          { key: "posts", label: "Feed posts", children: <Spot id="posts"><Posts editing={post} onEdit={setPost} /></Spot> },
+          { key: "faqs", label: "FAQs", children: <Spot id="faqs"><Faqs editing={faq} onEdit={setFaq} /></Spot> },
+          { key: "terms", label: "Terms", children: <Spot id="terms"><Terms editing={section} onEdit={setSection} /></Spot> },
         ]}
       />
     </ListCard>
