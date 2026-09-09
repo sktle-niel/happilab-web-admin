@@ -1,13 +1,10 @@
 import { BellOutlined, DownOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Dropdown, Tooltip } from "antd";
+import { useNavigate } from "react-router";
 import { GlobalSearch } from "../components/GlobalSearch";
 import { initials } from "../lib/format";
+import { useAttention } from "../lib/useAttention";
 import { useStaffSession } from "../providers/session";
-
-const NOTICES = [
-  { key: "n1", label: "3 cash-outs waiting for review" },
-  { key: "n2", label: "Ana Villanueva is in the support queue" },
-];
 
 type Props = { sidebarHidden: boolean; onToggleSidebar: () => void };
 
@@ -20,6 +17,21 @@ function SidebarToggle({ sidebarHidden, onToggleSidebar }: Props) {
         {sidebarHidden ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
       </button>
     </Tooltip>
+  );
+}
+
+/** The bell: what is waiting, counted live; each line opens its page. */
+function Bell() {
+  const navigate = useNavigate();
+  const { notices } = useAttention();
+  const items = notices.length > 0 ? notices.map((n) => ({ key: n.key, label: n.label, onClick: () => navigate(n.to) })) : [{ key: "none", label: "Nothing waiting on you.", disabled: true }];
+  return (
+    <Dropdown menu={{ items }} trigger={["click"]} placement="bottomRight">
+      <button type="button" className="bell" aria-label={`Notifications, ${notices.length} waiting`}>
+        <BellOutlined />
+        {notices.length > 0 && <span className="bell__dot">{notices.length}</span>}
+      </button>
+    </Dropdown>
   );
 }
 
@@ -42,12 +54,7 @@ export function Topbar(props: Props) {
       </div>
       <div className="topbar__tools">
         <GlobalSearch />
-        <Dropdown menu={{ items: NOTICES }} trigger={["click"]} placement="bottomRight">
-          <button type="button" className="bell" aria-label="Notifications">
-            <BellOutlined />
-            <span className="bell__dot">{NOTICES.length}</span>
-          </button>
-        </Dropdown>
+        <Bell />
       </div>
     </header>
   );

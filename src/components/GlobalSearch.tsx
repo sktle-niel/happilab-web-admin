@@ -1,11 +1,11 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useNavigate } from "react-router";
-import { overview } from "../data/fake/dashboard";
 import { canOpen, type PageKey } from "../lib/access";
 import { QUICK_ACTIONS } from "../lib/destinations";
 import { readRecent, remember } from "../lib/recentSearches";
 import { HIT_TYPES, searchAll, type Hit, type HitType } from "../lib/search";
+import { useAttention } from "../lib/useAttention";
 import { useStaffSession } from "../providers/session";
 import { SearchPanel, type Section } from "./SearchPanel";
 import type { Row } from "./SearchRow";
@@ -14,12 +14,12 @@ const ALL_TYPES = HIT_TYPES.map((t) => t.type);
 const hitRow = (hit: Hit): Row => ({ key: hit.key, title: hit.title, subtitle: hit.subtitle, to: hit.to, icon: hit.type, hit, ...(hit.stat && { stat: hit.stat }) });
 
 /** With nothing typed: what was opened lately, what staff come to do, and what is waiting. */
-function restingSections(recent: Hit[], pages: readonly PageKey[] | undefined): Section[] {
+function restingSections(recent: Hit[], pages: readonly PageKey[] | undefined, pendingCashOuts: number, queued: number): Section[] {
   const may = (page: PageKey) => canOpen(pages, page);
   const actions: Row[] = QUICK_ACTIONS.filter((a) => may(a.page)).map((a) => ({ key: `action:${a.to}`, title: a.label, to: a.to, kbd: a.key, icon: "plus" }));
   const waiting: Row[] = [
-    ...(may("cash-outs") ? [{ key: "wait:cash-outs", title: "Cash-outs to review", to: "/cash-outs", stat: String(overview.pending.count), icon: "cash-outs" as const }] : []),
-    ...(may("support") ? [{ key: "wait:support", title: "Members in the support queue", to: "/support", stat: String(overview.queue.waiting), icon: "support" as const }] : []),
+    ...(may("cash-outs") ? [{ key: "wait:cash-outs", title: "Cash-outs to review", to: "/cash-outs", stat: String(pendingCashOuts), icon: "cash-outs" as const }] : []),
+    ...(may("support") ? [{ key: "wait:support", title: "Members in the support queue", to: "/support", stat: String(queued), icon: "support" as const }] : []),
   ];
   return [
     ...(recent.length > 0 ? [{ label: "Recent", count: recent.length, rows: recent.map(hitRow) }] : []),
@@ -33,6 +33,7 @@ export function GlobalSearch() {
   const navigate = useNavigate();
   const { identity } = useStaffSession();
   const pages = identity?.pages;
+  const { pendingCashOuts, queued } = useAttention();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -57,8 +58,8 @@ export function GlobalSearch() {
 
   const term = query.trim();
   const sections = useMemo<Section[]>(
-    () => (term.length >= 2 ? searchAll(term, types).map((group) => ({ label: group.label, rows: group.hits.map(hitRow), ...(group.to && { seeAll: group.to }) })) : restingSections(recent, pages)),
-    [term, types, recent, pages],
+    () => (term.length >= 2 ? searchAll(term, types).map((group) => ({ label: group.label, rows: group.hits.map(hitRow), ...(group.to && { seeAll: group.to }) })) : restingSections(recent, pages, pendingCashOuts, queued)),
+    [term, types, recent, pages, pendingCashOuts, queued],
   );
   const flat = useMemo(() => sections.flatMap((section) => section.rows), [sections]);
 

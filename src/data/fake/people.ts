@@ -23,7 +23,8 @@ const LAST = ["Cruz", "Mendoza", "Reyes", "Bautista", "Villanueva", "Santos", "G
 
 const random = seeded(2026);
 
-const isoDaysAgo = (days: number) => new Date(Date.UTC(2026, 8, 8) - days * 86_400_000).toISOString();
+const TODAY = new Date(new Date().toDateString()).getTime();
+const isoDaysAgo = (days: number) => new Date(TODAY - days * 86_400_000).toISOString();
 
 export const members: Member[] = Array.from({ length: 96 }, (_, i) => {
   const name = `${random.pick(FIRST)} ${random.pick(LAST)}`;
