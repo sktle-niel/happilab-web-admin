@@ -46,3 +46,10 @@
   .product-preview { position: static; }
   .field-grid--3 { grid-template-columns: 1fr 1fr; }
 }
+
+/* Deleting is quiet and reversible, so it is a line under the buttons, not a third button. */
+.product-preview__delete { display: block; margin: 12px auto 0; border: 0; background: none; color: #c73e3e; font: 600 12.5px var(--font); cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background-color 120ms ease; }
+.product-preview__delete:disabled { opacity: 0.5; cursor: default; }
+@media (hover: hover) and (pointer: fine) {
+  .product-preview__delete:hover { background: rgba(199, 62, 62, 0.08); }
+}

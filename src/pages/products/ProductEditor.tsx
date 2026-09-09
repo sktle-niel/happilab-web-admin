@@ -7,6 +7,7 @@ import type { Product } from "../../data/fake/catalogue";
 import { BADGES, STORES } from "../../lib/products";
 import { PhotoDrop } from "./PhotoDrop";
 import { ProductPreview } from "./ProductPreview";
+import { useProductRemoval } from "./useProductRemoval";
 import { EMPTY, fromRecord, toRecord, type ProductValues } from "./productValues";
 
 const BADGE_OPTIONS = [{ label: "None", value: "" }, ...BADGES.map((badge) => ({ label: badge.label, value: badge.value }))];
@@ -90,6 +91,7 @@ export function ProductEditor() {
   const { result: catalogue } = useList<Product>({ resource: "products", pagination: { mode: "off" }, queryOptions: { enabled: !editing } });
   const { mutate: create } = useCreate<Product>();
   const { mutate: update } = useUpdate<Product>();
+  const { softDelete } = useProductRemoval();
   const watched = Form.useWatch([], form);
   const back = () => navigate("/products");
 
@@ -113,7 +115,7 @@ export function ProductEditor() {
       <PageHead title={record ? "Edit product" : "Add product"} subtitle="The card on the left is the product as members see it; fill it in on the right." />
       <Form<ProductValues> key={id ?? "new"} form={form} layout="vertical" requiredMark={false} initialValues={initial} onFinish={submit}>
         <div className="product-editor">
-          <ProductPreview values={live} isEdit={record !== undefined} busy={busy} onCancel={back} onSave={() => form.submit()} />
+          <ProductPreview values={live} isEdit={record !== undefined} busy={busy} onCancel={back} onSave={() => form.submit()} onDelete={record ? () => softDelete(record, back) : undefined} />
           <div className="product-editor__main stagger">
             <section className="card">
               <h3>Product photo</h3>

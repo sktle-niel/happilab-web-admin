@@ -13,6 +13,7 @@ const STYLES: Record<string, { background: string; color: string }> = {
   draft: { background: "#ffe08a", color: "#5a4300" },
   suspended: { background: "#f4f4f1", color: "#5f5f5c" },
   closed: { background: "#f4f4f1", color: "#5f5f5c" },
+  deleted: { background: "#f4f4f1", color: "#5f5f5c" },
   cancelled: { background: "#f4f4f1", color: "#5f5f5c" },
   failed: { background: "#ffd6d6", color: "#7a1f1f" },
   refunded: { background: "#ffd6d6", color: "#7a1f1f" },

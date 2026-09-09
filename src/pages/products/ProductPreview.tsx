@@ -4,10 +4,10 @@ import { pesos } from "../../lib/format";
 import { STORES, badgeOf, earnLabel } from "../../lib/products";
 import type { ProductValues } from "./productValues";
 
-type Props = { values: ProductValues; isEdit: boolean; busy: boolean; onCancel: () => void; onSave: () => void };
+type Props = { values: ProductValues; isEdit: boolean; busy: boolean; onCancel: () => void; onSave: () => void; onDelete?: () => void };
 
 /** The product as the app's grid tile shows it, redrawn from the form as it is typed. */
-export function ProductPreview({ values, isEdit, busy, onCancel, onSave }: Props) {
+export function ProductPreview({ values, isEdit, busy, onCancel, onSave, onDelete }: Props) {
   const badge = badgeOf(values.badge);
   const stores = STORES.filter((store) => values.storeLinks?.[store.key]);
   return (
@@ -42,6 +42,11 @@ export function ProductPreview({ values, isEdit, busy, onCancel, onSave }: Props
         <Button onClick={onCancel} disabled={busy}>Cancel</Button>
         <Button type="primary" onClick={onSave} loading={busy}>{isEdit ? "Save product" : "Create product"}</Button>
       </footer>
+      {onDelete && (
+        <button type="button" className="product-preview__delete" onClick={onDelete} disabled={busy}>
+          Delete this product
+        </button>
+      )}
     </aside>
   );
 }

@@ -28,8 +28,8 @@ export const fromRecord = (p: Product): ProductValues => ({
   isActive: p.isActive,
 });
 
-/** What the table keeps. Validation has already made every number real; empty links are dropped. */
-export const toRecord = (v: ProductValues, position: number): Omit<Product, "id"> => ({
+/** What the table keeps. Validation has already made every number real; empty links are dropped. The soft-delete stamp is the table's, never the form's. */
+export const toRecord = (v: ProductValues, position: number): Omit<Product, "id" | "deletedAt"> => ({
   name: v.name.trim(),
   blurb: v.blurb.trim(),
   priceCentavos: Math.round((v.price ?? 0) * 100),

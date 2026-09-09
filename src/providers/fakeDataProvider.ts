@@ -12,6 +12,9 @@ type Row = { id: string } & Record<string, unknown>;
 
 const tables: Record<string, Row[]> = { members, products, orders, "cash-outs": cashOuts, posts, faqs, staff, audit };
 
+/** Resources the API deletes softly: the row stays, stamped `deletedAt`, and a PATCH can bring it back. */
+const SOFT_DELETE = new Set(["products"]);
+
 const rows = (resource: string): Row[] => {
   const table = tables[resource];
   if (!table) throw new Error(`No bundled data for ${resource}`);
@@ -35,6 +38,10 @@ function matches(row: Row, filter: CrudFilter): boolean {
       return Array.isArray(wanted) && wanted.includes(value);
     case "contains":
       return String(value ?? "").toLowerCase().includes(String(wanted ?? "").toLowerCase());
+    case "null":
+      return value === null || value === undefined;
+    case "nnull":
+      return value !== null && value !== undefined;
     default:
       return true;
   }
@@ -89,7 +96,14 @@ export const fakeDataProvider: DataProvider = {
   },
 
   deleteOne: async ({ resource, id }) => {
-    const [row] = rows(resource).splice(find(resource, id), 1);
+    const table = rows(resource);
+    const index = find(resource, id);
+    if (SOFT_DELETE.has(resource)) {
+      const row = { ...table[index], deletedAt: new Date().toISOString() } as Row;
+      table[index] = row;
+      return { data: row as never };
+    }
+    const [row] = table.splice(index, 1);
     return { data: row as never };
   },
 };
