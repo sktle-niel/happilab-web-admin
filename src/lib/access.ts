@@ -45,3 +45,6 @@ export const pageLabel = (key: PageKey) => PAGES.find((page) => page.key === key
 /** "Everything", or the pages beyond the dashboard, in the sidebar's order. */
 export const describeAccess = (pages: readonly PageKey[]) =>
   ALL_PAGES.every((key) => pages.includes(key)) ? "Everything" : ALL_PAGES.filter((key) => key !== "dashboard" && pages.includes(key)).map(pageLabel).join(", ") || "Dashboard only";
+
+/** The catalogue, the copy, the settings, money and the staff list change only under the owner; the API refuses anyone else, and the pages hide the controls. */
+export const isOwner = (role: StaffRole | undefined) => role === "owner";

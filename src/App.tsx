@@ -17,6 +17,7 @@ import { Reset } from "./pages/login/Reset";
 import { Verify } from "./pages/login/Verify";
 import { MembersList } from "./pages/members/MembersList";
 import { NoAccess } from "./pages/NoAccess";
+import { OwnerOnly } from "./components/OwnerOnly";
 import { OrdersList } from "./pages/orders/OrdersList";
 import { ProductEditor } from "./pages/products/ProductEditor";
 import { ProductsList } from "./pages/products/ProductsList";
@@ -91,8 +92,8 @@ export function App() {
                   element={guarded(page.key, SCREENS[page.key])}
                 />
               ))}
-              <Route path="/products/new" element={guarded("products", <ProductEditor />)} />
-              <Route path="/products/:id/edit" element={guarded("products", <ProductEditor />)} />
+              <Route path="/products/new" element={guarded("products", <OwnerOnly><ProductEditor /></OwnerOnly>)} />
+              <Route path="/products/:id/edit" element={guarded("products", <OwnerOnly><ProductEditor /></OwnerOnly>)} />
               <Route path="/support/tickets/:ticketId" element={guarded("support", <SupportPage />)} />
               <Route path="/support/:id" element={guarded("support", <SupportPage />)} />
             </Route>
