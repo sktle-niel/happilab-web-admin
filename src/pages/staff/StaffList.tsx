@@ -30,7 +30,7 @@ const WORDS = {
 function useResendCode() {
   const { mutate, isPending } = useMutation({
     mutationFn: (account: Staff) => api.post(`/v1/admin/staff/${account.id}/invite`),
-    onSuccess: (_, account) => toast.success(`Code sent again to ${account.email}`, { description: "It is good for a day." }),
+    onSuccess: (_, account) => toast.success(`Code sent again to ${account.email}`, { description: "It is good for an hour." }),
     onError: (error: Error) => toast.error(error.message),
   });
   return { resend: mutate, sending: isPending };

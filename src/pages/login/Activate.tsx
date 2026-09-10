@@ -17,7 +17,7 @@ export function Activate() {
   return (
     <LoginShell>
       <h1>Activate your account</h1>
-      <p className="login__lead login__lead--tight">Enter the code from your email and choose your password. The code is good for a day.</p>
+      <p className="login__lead login__lead--tight">Enter the code from your email and choose your password. The code is good for an hour.</p>
       <Form<Values> initialValues={{ email: params.get("email") ?? "" }} onFinish={(values) => activate(values.email, values.code, values.password)} requiredMark={false}>
         <Field label="Email">
           <Form.Item name="email" rules={[{ required: true, type: "email", message: "Enter the email the code was sent to." }]} noStyle>
