@@ -2,6 +2,7 @@ import { DownOutlined } from "@ant-design/icons";
 import { Dropdown } from "antd";
 import { useState } from "react";
 import { PageHead } from "../../components/Card";
+import { Freshness } from "../../components/Freshness";
 import { canOpen, type PageKey } from "../../lib/access";
 import { dayLabel } from "../../lib/format";
 import { EMPTY_STATS, RANGES, useStats, type Range } from "../../lib/useStats";
@@ -33,7 +34,7 @@ const firstName = (name: string) => name.split(" ")[0] ?? name;
 export function Dashboard() {
   const { identity } = useStaffSession();
   const [range, setRange] = useState<Range>("today");
-  const { data } = useStats(range);
+  const { data, dataUpdatedAt, isFetching } = useStats(range);
   const stats = data ?? EMPTY_STATS;
   const noun = RANGES.find((r) => r.key === range)?.noun ?? "today";
   const may = (page: PageKey) => canOpen(identity?.pages, page);
@@ -43,7 +44,12 @@ export function Dashboard() {
       <PageHead
         title={onTheDesk ? `Your desk, ${firstName(identity?.name ?? "")}` : "Programme Overview"}
         subtitle={onTheDesk ? "What is waiting for you today." : `How the referral programme is doing ${noun}.`}
-        aside={<RangePill range={range} onChange={setRange} />}
+        aside={
+          <span className="dash__aside">
+            <Freshness updatedAt={dataUpdatedAt} fetching={isFetching} />
+            <RangePill range={range} onChange={setRange} />
+          </span>
+        }
       />
       <section className="dash">
         <div className="dash__stats stagger">

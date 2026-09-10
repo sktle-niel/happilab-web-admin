@@ -28,7 +28,7 @@ export function ProductPreview({ values, isEdit, busy, onCancel, onSave, onDelet
         <p className={values.blurb ? "" : "placeholder"}>{values.blurb || "One line about it, as members read it under the name."}</p>
         <div className="product-preview__money">
           <b className={values.price ? "" : "placeholder"}>{pesos(values.price ?? 0)}</b>
-          <small className={values.pointsMax ? "" : "placeholder"}>{earnLabel(values.pointsMin ?? 0, values.pointsMax ?? 0)}</small>
+          <small className={values.points ? "" : "placeholder"}>{earnLabel(values.points ?? 0)}</small>
         </div>
         <div className="product-preview__stores">
           {stores.length ? stores.map((store) => <span key={store.key} className="chip">{store.label}</span>) : <span className="cell-muted">Shares open a store search</span>}

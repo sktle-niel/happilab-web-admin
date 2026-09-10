@@ -8,9 +8,11 @@ import { ListCard } from "../../components/ListCard";
 import { SearchBox } from "../../components/SearchBox";
 import { StatusTag } from "../../components/StatusTag";
 import type { Product } from "../../data/types";
+import { isOwner } from "../../lib/access";
 import { dayLabel, pesos } from "../../lib/format";
 import { STORES, badgeOf } from "../../lib/products";
 import { useSearchFilter } from "../../lib/useSearchFilter";
+import { useStaffSession } from "../../providers/session";
 import { useProductRemoval } from "./useProductRemoval";
 
 const FIELDS = ["name", "blurb"] as const;
@@ -26,8 +28,11 @@ const viewFilter = (view: View): CrudFilter => ({ key: "view", operator: "and", 
 
 const storesOf = (p: Product) => STORES.filter((store) => p.storeLinks[store.key]).map((store) => store.label).join(", ") || "search only";
 
+/** Support reads the catalogue as members will see it; every control that changes it is the owner's, and the API refuses the rest. */
 export function ProductsList() {
   const navigate = useNavigate();
+  const { identity } = useStaffSession();
+  const owner = isOwner(identity?.role);
   const [view, setView] = useState<View>("catalogue");
   const { tableProps, setFilters } = useTable<Product>({
     resource: "products",
@@ -63,7 +68,7 @@ export function ProductsList() {
           <Segmented options={VIEWS} value={view} onChange={(next) => show(next as View)} />
         </>
       }
-      aside={<Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/products/new")}>Add product</Button>}
+      aside={owner ? <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/products/new")}>Add product</Button> : undefined}
     >
       <Table<Product> {...tableProps} rowKey="id" pagination={false}>
         <Table.Column<Product> title="Product" dataIndex="name" render={(_, p) => (
@@ -73,14 +78,15 @@ export function ProductsList() {
           </div>
         )} />
         <Table.Column<Product> title="Price" dataIndex="priceCentavos" render={(v: number) => pesos(v / 100)} />
-        <Table.Column<Product> title="Points per sale" render={(_, p) => `${p.pointsMin}–${p.pointsMax} pts`} />
+        <Table.Column<Product> title="Points per sale" render={(_, p) => `${p.points} pts`} />
         <Table.Column<Product> title="Badge" dataIndex="badge" render={(b: Product["badge"]) => (b ? <span className="chip chip--lavender">{badgeOf(b)?.label ?? b}</span> : <span className="cell-muted">—</span>)} />
         <Table.Column<Product> title="Stores" render={(_, p) => <span className="cell-muted">{storesOf(p)}</span>} />
         {deleted ? (
           <Table.Column<Product> title="Deleted" dataIndex="deletedAt" render={(v: string) => <><StatusTag status="deleted" /><span className="cell-muted">{dayLabel(new Date(v))}</span></>} />
         ) : (
-          <Table.Column<Product> title="Live" dataIndex="isActive" render={(v: boolean, p) => <Switch checked={v} onChange={(next) => setLive(p, next)} aria-label={`${p.name} live`} />} />
+          <Table.Column<Product> title="Live" dataIndex="isActive" render={(v: boolean, p) => (owner ? <Switch checked={v} onChange={(next) => setLive(p, next)} aria-label={`${p.name} live`} /> : <StatusTag status={v ? "active" : "suspended"} label={v ? "Live" : "Hidden"} />)} />
         )}
+        {owner && (
         <Table.Column<Product> title="" render={(_, p) => (
           deleted ? (
             <Button size="small" onClick={() => restore(p)}>Restore</Button>
@@ -91,6 +97,7 @@ export function ProductsList() {
             </Space>
           )
         )} />
+        )}
       </Table>
     </ListCard>
   );

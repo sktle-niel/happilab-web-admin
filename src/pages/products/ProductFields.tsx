@@ -20,26 +20,12 @@ export function ProductFields() {
       <Form.Item name="blurb" label="Blurb" rules={[required("Say what it is in a line."), { max: 120, message: "Up to 120 characters." }]}>
         <Input.TextArea rows={2} maxLength={120} showCount placeholder="Gentle wellness soap with sunscreen benefits" />
       </Form.Item>
-      <div className="field-grid field-grid--3">
+      <div className="field-grid">
         <Form.Item name="price" label="Price" rules={[required("Set a price."), atLeastOne]}>
           <InputNumber prefix="₱" min={1} step={10} placeholder="150" />
         </Form.Item>
-        <Form.Item name="pointsMin" label="Points per sale, from" rules={[required("The least it earns."), atLeastOne]}>
+        <Form.Item name="points" label="Points per sale" extra="What the referrer earns for each unit sold through their code." rules={[required("Set what it earns."), atLeastOne]}>
           <InputNumber min={1} placeholder="7" />
-        </Form.Item>
-        <Form.Item
-          name="pointsMax"
-          label="Points per sale, up to"
-          dependencies={["pointsMin"]}
-          rules={[
-            required("The most it earns."),
-            atLeastOne,
-            ({ getFieldValue }) => ({
-              validator: (_, value: number | null) => (value == null || value >= (getFieldValue("pointsMin") ?? 0) ? Promise.resolve() : Promise.reject(new Error("Not below the lower figure."))),
-            }),
-          ]}
-        >
-          <InputNumber min={1} placeholder="11" />
         </Form.Item>
       </div>
       <p className="field-note">Store links. A share opens the store with the member's code attached; a store without a link opens a search for the name.</p>

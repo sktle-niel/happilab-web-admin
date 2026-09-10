@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { googleEnabled } from "../../lib/google";
-import { takeExpiredFlag } from "../../providers/authProvider";
+import { takeExpiredFlag } from "../../providers/tokens";
 import { useStaffSession } from "../../providers/session";
 import { Field, LoginShell } from "./LoginShell";
 
@@ -14,7 +14,7 @@ export function Login() {
   const { signInWithPassword, signInWithGoogle, isBusy } = useStaffSession();
 
   useEffect(() => {
-    if (takeExpiredFlag()) toast("You were signed out after seven days away. Sign in again.", { id: "expired" });
+    if (takeExpiredFlag()) toast("Your session has ended. Sign in again.", { id: "expired" });
   }, []);
 
   return (
@@ -48,6 +48,7 @@ export function Login() {
         </div>
         <Button type="primary" htmlType="submit" block loading={isBusy} className="login__submit">Continue</Button>
       </Form>
+      <p className="login__note"><Link to="/login/activate" className="login__link">New to the desk? Activate your account</Link></p>
     </LoginShell>
   );
 }

@@ -20,4 +20,4 @@ export const BADGES: { value: Badge; label: string; pill: string; tone: "lime" |
 export const badgeOf = (badge: ProductBadge | "") => BADGES.find((b) => b.value === badge);
 
 /** The earn line under the price, worded as the app's grid tile words it. */
-export const earnLabel = (min: number, max: number) => `Earn ${min === max ? min : `${min}–${max}`} pts`;
+export const earnLabel = (points: number) => `Earn ${points} pts`;

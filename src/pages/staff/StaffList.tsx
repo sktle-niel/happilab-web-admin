@@ -1,19 +1,23 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useTable } from "@refinedev/antd";
-import { Button, Space, Table } from "antd";
+import { useDelete } from "@refinedev/core";
+import { useMutation } from "@tanstack/react-query";
+import { Button, Popconfirm, Space, Table } from "antd";
 import { useState } from "react";
+import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
 import { Spot } from "../../components/Spot";
 import { StatusTag } from "../../components/StatusTag";
 import type { Staff } from "../../data/types";
 import { ROLE_LABELS, describeAccess } from "../../lib/access";
+import { api } from "../../lib/api";
 import { dayLabel, initials } from "../../lib/format";
 import { useAccountStatus } from "../../lib/useAccountStatus";
 import { useStaffSession } from "../../providers/session";
 import { StaffForm } from "./StaffForm";
 
-/** The wire says suspended; the page says deactivated. */
-const LABELS: Partial<Record<Staff["status"], string>> = { suspended: "Deactivated" };
+/** The wire says suspended and pending; the page says deactivated and waiting for its code. */
+const LABELS: Partial<Record<Staff["status"], string>> = { suspended: "Deactivated", pending: "Pending code" };
 
 const WORDS = {
   off: "deactivated",
@@ -21,6 +25,28 @@ const WORDS = {
   offDescription: "Signed out everywhere. The account keeps its role and pages for when it comes back.",
   onDescription: "They can sign in again, with a code as always.",
 };
+
+/** A fresh activation code for an account still waiting on its first; the API's refusal is told as it worded it. */
+function useResendCode() {
+  const { mutate, isPending } = useMutation({
+    mutationFn: (account: Staff) => api.post(`/v1/admin/staff/${account.id}/invite`),
+    onSuccess: (_, account) => toast.success(`Code sent again to ${account.email}`, { description: "It is good for an hour." }),
+    onError: (error: Error) => toast.error(error.message),
+  });
+  return { resend: mutate, sending: isPending };
+}
+
+/** An invitation the owner takes back: the pending row goes, and its code with it. */
+function useWithdraw() {
+  const { mutate } = useDelete<Staff>();
+  return (account: Staff) =>
+    mutate({
+      resource: "staff",
+      id: account.id,
+      successNotification: { type: "success", message: `${account.name} removed`, description: "The code that was sent no longer opens anything." },
+      errorNotification: (error?: { message?: string }) => ({ type: "error", message: error?.message ?? "That account could not be removed." }),
+    });
+}
 
 type SwitchProps = { account: Staff; onDisable: (s: Staff) => void; onEnable: (s: Staff) => void };
 
@@ -36,6 +62,8 @@ export function StaffList() {
   const { tableProps } = useTable<Staff>({ resource: "staff", pagination: { mode: "off" } });
   const { identity } = useStaffSession();
   const { disable, enable } = useAccountStatus("staff", WORDS);
+  const { resend, sending } = useResendCode();
+  const withdraw = useWithdraw();
   const [editing, setEditing] = useState<Staff | null | undefined>(undefined);
   // The API refuses edits to the owner and to oneself, so neither row offers them.
   const untouchable = (s: Staff) => s.role === "owner" || s.id === identity?.id;
@@ -43,7 +71,7 @@ export function StaffList() {
     <ListCard
       title="Staff"
       subtitle="Who runs the programme, and which pages each of them may open."
-      aside={<Spot id="add-staff" inline><Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>Add staff</Button></Spot>}
+      aside={<Spot id="add-staff" inline><Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>Add support</Button></Spot>}
     >
       <Table<Staff> {...tableProps} rowKey="id" pagination={false}>
         <Table.Column<Staff> title="Account" dataIndex="name" render={(_, s) => (
@@ -59,7 +87,16 @@ export function StaffList() {
         <Table.Column<Staff> title="" render={(_, s) => (untouchable(s) ? null : (
           <Space>
             <Button size="small" onClick={() => setEditing(s)}>Edit access</Button>
-            <StaffSwitch account={s} onDisable={disable} onEnable={enable} />
+            {s.status === "pending" ? (
+              <>
+                <Button size="small" loading={sending} onClick={() => resend(s)}>Resend code</Button>
+                <Popconfirm title="Remove this invitation?" description="The code already sent will no longer open anything." okText="Remove" onConfirm={() => withdraw(s)}>
+                  <Button size="small" type="text" danger>Remove</Button>
+                </Popconfirm>
+              </>
+            ) : (
+              <StaffSwitch account={s} onDisable={disable} onEnable={enable} />
+            )}
           </Space>
         ))} />
       </Table>

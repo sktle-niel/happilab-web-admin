@@ -6,22 +6,20 @@ export type ProductValues = {
   name: string;
   blurb: string;
   price: number | null;
-  pointsMin: number | null;
-  pointsMax: number | null;
+  points: number | null;
   badge: ProductBadge | "";
   imageUrl: string;
   storeLinks: Partial<Record<Store, string>>;
   isActive: boolean;
 };
 
-export const EMPTY: ProductValues = { name: "", blurb: "", price: null, pointsMin: null, pointsMax: null, badge: "", imageUrl: "", storeLinks: {}, isActive: true };
+export const EMPTY: ProductValues = { name: "", blurb: "", price: null, points: null, badge: "", imageUrl: "", storeLinks: {}, isActive: true };
 
 export const fromRecord = (p: Product): ProductValues => ({
   name: p.name,
   blurb: p.blurb,
   price: p.priceCentavos / 100,
-  pointsMin: p.pointsMin,
-  pointsMax: p.pointsMax,
+  points: p.points,
   badge: p.badge ?? "",
   imageUrl: p.imageUrl,
   storeLinks: p.storeLinks,
@@ -33,8 +31,7 @@ export const toRecord = (v: ProductValues): Omit<Product, "id" | "deletedAt" | "
   name: v.name.trim(),
   blurb: v.blurb.trim(),
   priceCentavos: Math.round((v.price ?? 0) * 100),
-  pointsMin: v.pointsMin ?? 0,
-  pointsMax: v.pointsMax ?? 0,
+  points: v.points ?? 0,
   imageUrl: v.imageUrl,
   badge: v.badge || null,
   isActive: v.isActive,

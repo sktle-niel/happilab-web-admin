@@ -5,15 +5,16 @@ import { toast } from "sonner";
 import type { Settings } from "../../data/types";
 import { uploadFile, type UploadKind } from "../../lib/uploads";
 import { useSaveSetting, useSettings } from "../../lib/useSettings";
+import { useIsOwner } from "../../providers/session";
 import { SettingsCard } from "./SettingsCard";
 
 const MAX_CLIPS = 6;
 const IMAGE = "image/png,image/jpeg,image/webp";
 const VIDEO = "video/mp4";
 
-type SlotProps = { label: string; hint: string; accept: string; kind: UploadKind; url: string | null; busy: boolean; onPick: (file: File) => void; onClear: () => void };
+type SlotProps = { label: string; hint: string; accept: string; kind: UploadKind; url: string | null; busy: boolean; canChange: boolean; onPick: (file: File) => void; onClear: () => void };
 
-function Slot({ label, hint, accept, url, busy, onPick, onClear }: SlotProps) {
+function Slot({ label, hint, accept, url, busy, canChange, onPick, onClear }: SlotProps) {
   return (
     <div className="asset-slot">
       <div className="asset-slot__text">
@@ -21,12 +22,14 @@ function Slot({ label, hint, accept, url, busy, onPick, onClear }: SlotProps) {
         <span className="cell-muted">{hint}</span>
       </div>
       {url && <img className="cell-thumb" src={url} alt="" />}
+      {canChange && (
       <Space>
         <Upload accept={accept} showUploadList={false} disabled={busy} beforeUpload={(file) => { onPick(file); return Upload.LIST_IGNORE; }}>
           <Button size="small" icon={<UploadOutlined />} loading={busy}>{url ? "Replace" : "Upload"}</Button>
         </Upload>
         {url && <Button size="small" type="text" danger icon={<DeleteOutlined />} aria-label={`Remove ${label}`} onClick={onClear} />}
       </Space>
+      )}
     </div>
   );
 }
@@ -35,6 +38,7 @@ function Slot({ label, hint, accept, url, busy, onPick, onClear }: SlotProps) {
 export function AssetsCard() {
   const { settings } = useSettings();
   const { save } = useSaveSetting();
+  const owner = useIsOwner();
   const [busy, setBusy] = useState<UploadKind | null>(null);
   const assets = settings?.assets;
   if (!assets) return <SettingsCard title="Assets" spot="assets"><p className="cell-muted">Loading…</p></SettingsCard>;
@@ -51,8 +55,8 @@ export function AssetsCard() {
   return (
     <SettingsCard title="Assets" spot="assets">
       <p className="cell-muted" style={{ marginTop: 0 }}>The logo, the backdrop behind every screen, and the onboarding clips. Images and mp4 only.</p>
-      <Slot label="Logo" hint="PNG or WebP with transparency, 512 × 512." accept={IMAGE} kind="logo" url={assets.logoUrl} busy={busy === "logo"} onPick={(file) => upload("logo", file, (url) => ({ ...assets, logoUrl: url }), "Logo")} onClear={() => put({ ...assets, logoUrl: null }, "Logo")} />
-      <Slot label="Backdrop" hint="The picture every screen sits on. Portrait, 1080 × 1920 or larger." accept={IMAGE} kind="backdrop" url={assets.backdropUrl} busy={busy === "backdrop"} onPick={(file) => upload("backdrop", file, (url) => ({ ...assets, backdropUrl: url }), "Backdrop")} onClear={() => put({ ...assets, backdropUrl: null }, "Backdrop")} />
+      <Slot canChange={owner} label="Logo" hint="PNG or WebP with transparency, 512 × 512." accept={IMAGE} kind="logo" url={assets.logoUrl} busy={busy === "logo"} onPick={(file) => upload("logo", file, (url) => ({ ...assets, logoUrl: url }), "Logo")} onClear={() => put({ ...assets, logoUrl: null }, "Logo")} />
+      <Slot canChange={owner} label="Backdrop" hint="The picture every screen sits on. Portrait, 1080 × 1920 or larger." accept={IMAGE} kind="backdrop" url={assets.backdropUrl} busy={busy === "backdrop"} onPick={(file) => upload("backdrop", file, (url) => ({ ...assets, backdropUrl: url }), "Backdrop")} onClear={() => put({ ...assets, backdropUrl: null }, "Backdrop")} />
       <div className="asset-slot asset-slot--clips">
         <div className="asset-slot__text">
           <b>Onboarding clips</b>
@@ -62,12 +66,14 @@ export function AssetsCard() {
           {clips.map((url, i) => (
             <span key={url} className="chip chip--lavender">
               Clip {i + 1}
-              <button type="button" aria-label={`Remove clip ${i + 1}`} onClick={() => put({ ...assets, onboardingClipUrls: clips.filter((u) => u !== url) }, "Clips")}>×</button>
+              {owner && <button type="button" aria-label={`Remove clip ${i + 1}`} onClick={() => put({ ...assets, onboardingClipUrls: clips.filter((u) => u !== url) }, "Clips")}>×</button>}
             </span>
           ))}
+          {owner && (
           <Upload accept={VIDEO} showUploadList={false} disabled={full || busy === "clip"} beforeUpload={(file) => { upload("clip", file, (url) => ({ ...assets, onboardingClipUrls: [...clips, url] }), "Clips"); return Upload.LIST_IGNORE; }}>
             <Button size="small" icon={<UploadOutlined />} disabled={full} loading={busy === "clip"}>{full ? "Six clips is the most" : "Add clip"}</Button>
           </Upload>
+          )}
         </div>
       </div>
     </SettingsCard>

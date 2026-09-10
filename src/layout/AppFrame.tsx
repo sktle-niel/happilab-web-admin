@@ -1,4 +1,5 @@
 import { Outlet } from "react-router";
+import { FetchingBar } from "../components/FetchingBar";
 import { useSpotlight } from "../lib/useSpotlight";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
@@ -12,6 +13,7 @@ export function AppFrame() {
     <div className={`app${hidden ? " is-collapsed" : ""}`}>
       <Sidebar hidden={hidden} />
       <main className="content">
+        <FetchingBar />
         <div className="content__inner">
           <Topbar sidebarHidden={hidden} onToggleSidebar={toggle} />
           <Outlet />

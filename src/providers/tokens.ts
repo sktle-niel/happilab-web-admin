@@ -9,6 +9,7 @@ import { API_BASE_URL } from "../lib/config";
 export type Tokens = { access_token: string; refresh_token: string; expires_at: string };
 
 const KEY = "happilab-admin.tokens";
+const EXPIRED = "happilab-admin.expired";
 const MARGIN_MS = 30_000;
 let cached: Tokens | null | undefined;
 let renewing: Promise<Tokens | null> | null = null;
@@ -61,4 +62,39 @@ export async function accessToken(): Promise<string | null> {
   const current = readTokens();
   if (!current) return null;
   return fresh(current) ? current.access_token : ((await renewTokens())?.access_token ?? null);
+}
+
+/** Remembers, for the sign-in page, that the session ended on its own rather than by choice. */
+export function markExpired(): void {
+  try {
+    sessionStorage.setItem(EXPIRED, "1");
+  } catch {
+    // No storage: the page says nothing special.
+  }
+}
+
+/** True once, right after a session ended on its own. */
+export function takeExpiredFlag(): boolean {
+  try {
+    const was = sessionStorage.getItem(EXPIRED) === "1";
+    sessionStorage.removeItem(EXPIRED);
+    return was;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The session is over and the API will not renew it: forget the tokens and
+ * go back to sign-in, from wherever the page was, with the way back kept
+ * as a deep link. A full navigation, so nothing of the old session stays
+ * in memory. On the sign-in pages themselves there is nowhere to go.
+ */
+export function expireSession(): void {
+  saveTokens(null);
+  markExpired();
+  const { pathname, search } = window.location;
+  if (pathname.startsWith("/login")) return;
+  const back = pathname === "/" ? "" : `?to=${encodeURIComponent(pathname + search)}`;
+  window.location.replace(`/login${back}`);
 }

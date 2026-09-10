@@ -19,8 +19,10 @@ export function useSaveRecord(resource: string, words: Words) {
     const done = { onSuccess: () => onDone?.(), onSettled: () => setBusy(false) };
     const said = description ?? words.description;
     const notice = (message: string) => ({ type: "success" as const, message, ...(said && { description: said }) });
-    if (id) update({ resource, id, values, successNotification: notice(words.updated) }, done);
-    else create({ resource, values, successNotification: notice(words.created) }, done);
+    // The API's own sentence is the whole notice; Refine's "status code: undefined" title says nothing.
+    const refusal = (error?: { message?: string }) => ({ type: "error" as const, message: error?.message ?? "That could not be saved." });
+    if (id) update({ resource, id, values, successNotification: notice(words.updated), errorNotification: refusal }, done);
+    else create({ resource, values, successNotification: notice(words.created), errorNotification: refusal }, done);
   };
 
   return { save, busy };

@@ -11,11 +11,13 @@ import { CashOutsList } from "./pages/cashouts/CashOutsList";
 import { ContentPage } from "./pages/content/ContentPage";
 import { Dashboard } from "./pages/dashboard/Dashboard";
 import { Forgot } from "./pages/login/Forgot";
+import { Activate } from "./pages/login/Activate";
 import { Login } from "./pages/login/Login";
 import { Reset } from "./pages/login/Reset";
 import { Verify } from "./pages/login/Verify";
 import { MembersList } from "./pages/members/MembersList";
 import { NoAccess } from "./pages/NoAccess";
+import { OwnerOnly } from "./components/OwnerOnly";
 import { OrdersList } from "./pages/orders/OrdersList";
 import { ProductEditor } from "./pages/products/ProductEditor";
 import { ProductsList } from "./pages/products/ProductsList";
@@ -90,8 +92,8 @@ export function App() {
                   element={guarded(page.key, SCREENS[page.key])}
                 />
               ))}
-              <Route path="/products/new" element={guarded("products", <ProductEditor />)} />
-              <Route path="/products/:id/edit" element={guarded("products", <ProductEditor />)} />
+              <Route path="/products/new" element={guarded("products", <OwnerOnly><ProductEditor /></OwnerOnly>)} />
+              <Route path="/products/:id/edit" element={guarded("products", <OwnerOnly><ProductEditor /></OwnerOnly>)} />
               <Route path="/support/tickets/:ticketId" element={guarded("support", <SupportPage />)} />
               <Route path="/support/:id" element={guarded("support", <SupportPage />)} />
             </Route>
@@ -106,10 +108,11 @@ export function App() {
               <Route path="/login/verify" element={<Verify />} />
               <Route path="/login/forgot" element={<Forgot />} />
               <Route path="/login/reset" element={<Reset />} />
+              <Route path="/login/activate" element={<Activate />} />
             </Route>
           </Routes>
         </Refine>
-        <Toaster position="bottom-right" toastOptions={{ style: TOAST_STYLE }} />
+        <Toaster position="top-center" toastOptions={{ style: TOAST_STYLE }} />
       </ConfigProvider>
     </BrowserRouter>
   );

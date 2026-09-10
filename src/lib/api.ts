@@ -1,4 +1,4 @@
-import { accessToken, renewTokens } from "../providers/tokens";
+import { accessToken, expireSession, renewTokens } from "../providers/tokens";
 import { API_BASE_URL } from "./config";
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -28,7 +28,9 @@ async function refusal(response: Response): Promise<ApiError> {
 /**
  * Every call the admin makes: JSON in and out, the bearer token when the
  * route wants one, one renewal and retry on a 401, and the API's own
- * sentence on a refusal. Nothing else in the codebase calls fetch.
+ * sentence on a refusal. A 401 that a renewal cannot mend ends the session
+ * here, whichever page made the call, so no page has to notice on its own.
+ * Nothing else in the codebase calls fetch.
  */
 export async function request<T>(method: Method, path: string, body?: unknown, { auth = true, retry = true }: Options = {}): Promise<T> {
   const token = auth ? await accessToken() : null;
@@ -42,7 +44,11 @@ export async function request<T>(method: Method, path: string, body?: unknown, {
   } catch {
     throw new ApiError(0, "unreachable", "Cannot reach the API. Is it running?");
   }
-  if (response.status === 401 && auth && retry && (await renewTokens())) return request<T>(method, path, body, { auth, retry: false });
+  if (response.status === 401 && auth) {
+    if (retry && (await renewTokens())) return request<T>(method, path, body, { auth, retry: false });
+    expireSession();
+    throw new ApiError(401, "unauthenticated", "Your session has ended. Sign in again.");
+  }
   if (!response.ok) throw await refusal(response);
   return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
 }

@@ -8,7 +8,7 @@ import type { PageKey, StaffRole } from "../lib/access";
 export type MemberStatus = "active" | "suspended" | "closed";
 export type Member = { id: string; fullName: string; email: string; referralCode: string; points: number; lifetimePoints: number; referredPeople: number; referredBuyers: number; status: MemberStatus; joinedAt: string };
 
-export type Staff = { id: string; name: string; email: string; role: StaffRole; pages: PageKey[]; status: "active" | "suspended"; lastSeenAt: string | null; createdAt: string };
+export type Staff = { id: string; name: string; email: string; role: StaffRole; pages: PageKey[]; status: "pending" | "active" | "suspended"; lastSeenAt: string | null; createdAt: string };
 
 export type ProductBadge = "topSale" | "newArrival" | "comingSoon" | null;
 export type StoreLinks = Partial<Record<"tiktok" | "shopee" | "lazada", string>>;
@@ -17,8 +17,8 @@ export type Product = {
   name: string;
   blurb: string;
   priceCentavos: number;
-  pointsMin: number;
-  pointsMax: number;
+  /** What the referrer earns per unit sold. */
+  points: number;
   imageUrl: string;
   badge: ProductBadge;
   isActive: boolean;
