@@ -36,6 +36,7 @@ export function useStaffSession() {
     signInWithPassword: (email: string, password: string) => start({ email: email.trim().toLowerCase(), password }),
     signInWithGoogle: () => googleIdToken().then((idToken) => start({ google_id_token: idToken }), (error: Error) => toast.error(error.message)),
     verify: (code: string) => login({ code }),
+    activate: (email: string, code: string, password: string) => login({ email, code, password }),
     signOut: () => logout(),
   };
 }

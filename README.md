@@ -32,8 +32,9 @@ VITE_API_BASE_URL=https://api.example.com npm run build
 Sign in with the owner's email and password; a six-digit code follows by
 email — in development the API prints it in its own terminal. Set
 `VITE_GOOGLE_CLIENT_ID` (and the same id on the API) to show "Continue
-with Google". A staff account added without a password is emailed a link
-to choose one.
+with Google". A support account added on the Staff page is pending until
+the person enters the code emailed to them, with a password of their own,
+at `/login/activate`; the owner can resend the code from the list.
 
 Two levels of staff: the owner, one account that runs everything, and
 support accounts, as many as the desk needs, which the Staff page adds.

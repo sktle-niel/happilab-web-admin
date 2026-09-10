@@ -26,7 +26,7 @@ export function StaffForm({ open, account, onClose }: Props) {
   const submit = (values: Values) => {
     const pages: PageKey[] = ["dashboard", ...values.pages.filter((key) => key !== "dashboard")];
     if (account) save(account.id, { name: values.name, pages }, onClose, `${values.name} can open ${pages.length - 1} pages besides the dashboard.`);
-    else save(null, { ...values, pages }, onClose, "An email with a link to choose their password is on its way.");
+    else save(null, { ...values, pages }, onClose, "A code is on its way to their email. They enter it with a password of their choice on the sign-in page, under Activate your account.");
   };
 
   return (

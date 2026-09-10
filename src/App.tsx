@@ -11,6 +11,7 @@ import { CashOutsList } from "./pages/cashouts/CashOutsList";
 import { ContentPage } from "./pages/content/ContentPage";
 import { Dashboard } from "./pages/dashboard/Dashboard";
 import { Forgot } from "./pages/login/Forgot";
+import { Activate } from "./pages/login/Activate";
 import { Login } from "./pages/login/Login";
 import { Reset } from "./pages/login/Reset";
 import { Verify } from "./pages/login/Verify";
@@ -106,6 +107,7 @@ export function App() {
               <Route path="/login/verify" element={<Verify />} />
               <Route path="/login/forgot" element={<Forgot />} />
               <Route path="/login/reset" element={<Reset />} />
+              <Route path="/login/activate" element={<Activate />} />
             </Route>
           </Routes>
         </Refine>

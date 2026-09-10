@@ -15,8 +15,8 @@ const EXPIRED = "happilab-admin.expired";
 /** Step one, either way in. */
 export type SignInBody = { email: string; password: string } | { google_id_token: string };
 
-/** Step two: the code from the email. */
-export type LoginParams = { code: string };
+/** Step two: the code from the email; or a new account's activation, the code from its inbox with the password it chooses. */
+export type LoginParams = { code: string } | { email: string; code: string; password: string };
 export type Challenge = { id: string; sentTo: string; sentAt: number };
 type Me = { id: string; name: string; email: string; role: StaffIdentity["role"]; pages: StaffIdentity["pages"] };
 
@@ -74,9 +74,23 @@ export async function startSignIn(body: SignInBody): Promise<void> {
   sessionStorage.setItem(CHALLENGE, JSON.stringify({ id: started.challenge_id, sentTo: started.sent_to, sentAt: Date.now() } satisfies Challenge));
 }
 
+/** A pending account opens with the code from its inbox and a password of its own; the API answers with a session. */
+async function activate(params: { email: string; code: string; password: string }) {
+  if (!passwordMeetsPolicy(params.password)) return failed(new Error("Twelve characters, a capital, a number and a symbol."));
+  try {
+    saveTokens(await api.post<Tokens>("/v1/admin/auth/activate", { email: params.email.trim().toLowerCase(), code: params.code, password: params.password }, { auth: false }));
+    identity = undefined;
+    return { success: true, redirectTo: "/" };
+  } catch (error) {
+    return failed(error);
+  }
+}
+
 export const authProvider: AuthProvider = {
   /** Step two: the code proves the inbox, and only then is there a session. */
-  login: async ({ code }: LoginParams) => {
+  login: async (params: LoginParams) => {
+    if ("email" in params) return activate(params);
+    const { code } = params;
     try {
       const pending = readChallenge();
       if (!pending) return failed(new Error("Start again from the sign-in page."));

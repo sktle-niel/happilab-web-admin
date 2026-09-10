@@ -10,6 +10,7 @@ const STYLES: Record<string, { background: string; color: string }> = {
   processing: { background: "#b9b2f4", color: "#2a2358" },
   placed: { background: "#b9b2f4", color: "#2a2358" },
   review: { background: "#ffe08a", color: "#5a4300" },
+  pending: { background: "#ffe08a", color: "#5a4300" },
   draft: { background: "#ffe08a", color: "#5a4300" },
   suspended: { background: "#f4f4f1", color: "#5f5f5c" },
   closed: { background: "#f4f4f1", color: "#5f5f5c" },
