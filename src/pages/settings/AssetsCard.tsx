@@ -66,12 +66,14 @@ export function AssetsCard() {
           {clips.map((url, i) => (
             <span key={url} className="chip chip--lavender">
               Clip {i + 1}
-              <button type="button" aria-label={`Remove clip ${i + 1}`} onClick={() => put({ ...assets, onboardingClipUrls: clips.filter((u) => u !== url) }, "Clips")}>×</button>
+              {owner && <button type="button" aria-label={`Remove clip ${i + 1}`} onClick={() => put({ ...assets, onboardingClipUrls: clips.filter((u) => u !== url) }, "Clips")}>×</button>}
             </span>
           ))}
+          {owner && (
           <Upload accept={VIDEO} showUploadList={false} disabled={full || busy === "clip"} beforeUpload={(file) => { upload("clip", file, (url) => ({ ...assets, onboardingClipUrls: [...clips, url] }), "Clips"); return Upload.LIST_IGNORE; }}>
             <Button size="small" icon={<UploadOutlined />} disabled={full} loading={busy === "clip"}>{full ? "Six clips is the most" : "Add clip"}</Button>
           </Upload>
+          )}
         </div>
       </div>
     </SettingsCard>
