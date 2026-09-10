@@ -34,6 +34,12 @@ function read<T>(key: string): T | null {
 /** The sign-in waiting for its code, if any. */
 export const readChallenge = () => read<Challenge>(CHALLENGE);
 
+/** The sign-in is over — its ten minutes passed, or the desk refused it — so the code page has nothing to verify. */
+export const forgetChallenge = () => sessionStorage.removeItem(CHALLENGE);
+
+/** True when the API says the challenge is gone rather than the code wrong. */
+export const isExpiredSignIn = (error: unknown) => error instanceof ApiError && error.status === 404;
+
 export async function resendCode(): Promise<void> {
   const pending = readChallenge();
   if (!pending) return;
@@ -75,10 +81,11 @@ export const authProvider: AuthProvider = {
       const pending = readChallenge();
       if (!pending) return failed(new Error("Start again from the sign-in page."));
       saveTokens(await api.post<Tokens>("/v1/admin/auth/verify", { challenge_id: pending.id, code }, { auth: false }));
-      sessionStorage.removeItem(CHALLENGE);
+      forgetChallenge();
       identity = undefined;
       return { success: true, redirectTo: "/" };
     } catch (error) {
+      if (isExpiredSignIn(error)) forgetChallenge();
       return failed(error);
     }
   },

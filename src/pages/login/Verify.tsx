@@ -1,14 +1,16 @@
 import { Button } from "antd";
 import { OTPInput, REGEXP_ONLY_DIGITS, type SlotProps } from "input-otp";
-import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router";
+import { useCallback, useEffect, useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router";
 import { toast } from "sonner";
-import { readChallenge, resendCode } from "../../providers/authProvider";
+import { forgetChallenge, isExpiredSignIn, readChallenge, resendCode } from "../../providers/authProvider";
 import { useStaffSession } from "../../providers/session";
 import { LoginShell } from "./LoginShell";
 
 const LENGTH = 6;
 const RESEND_SECONDS = 30;
+/** A code is good for this long from the moment it is sent; a resend starts it over. */
+const CODE_MINUTES = 10;
 
 function Slot({ char, isActive, hasFakeCaret }: SlotProps) {
   return (
@@ -21,7 +23,8 @@ function Slot({ char, isActive, hasFakeCaret }: SlotProps) {
 /** Step two of two: the code from the email. Verifies on the sixth digit. */
 export function Verify() {
   const { verify, isBusy } = useStaffSession();
-  const [challenge] = useState(readChallenge);
+  const navigate = useNavigate();
+  const [challenge, setChallenge] = useState(readChallenge);
   const [code, setCode] = useState("");
   const [wait, setWait] = useState(RESEND_SECONDS);
 
@@ -31,15 +34,32 @@ export function Verify() {
     return () => window.clearTimeout(timer);
   }, [wait]);
 
+  /** The sign-in is over: back to the start, and say why. */
+  const expire = useCallback(() => {
+    forgetChallenge();
+    toast("That sign-in has expired. Start again.", { id: "expired-code" });
+    navigate("/login", { replace: true });
+  }, [navigate]);
+
+  // The code's ten minutes run from when it was sent; once they pass, the page has nothing to verify.
+  useEffect(() => {
+    if (!challenge) return;
+    const left = challenge.sentAt + CODE_MINUTES * 60_000 - Date.now();
+    if (left <= 0) return expire();
+    const timer = window.setTimeout(expire, left);
+    return () => window.clearTimeout(timer);
+  }, [challenge, expire]);
+
   if (!challenge) return <Navigate to="/login" replace />;
 
   const resend = () =>
     resendCode().then(
       () => {
+        setChallenge(readChallenge());
         setWait(RESEND_SECONDS);
         toast(`Code sent again to ${challenge.sentTo}.`);
       },
-      (error: Error) => toast.error(error.message),
+      (error: Error) => (isExpiredSignIn(error) ? expire() : toast.error(error.message)),
     );
 
   return (
