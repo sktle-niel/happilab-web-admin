@@ -12,7 +12,11 @@ import { accessToken, readTokens, saveTokens, type Tokens } from "./tokens";
 const CHALLENGE = "happilab-admin.challenge";
 const EXPIRED = "happilab-admin.expired";
 
-export type LoginParams = { method: "password"; email: string; password: string } | { method: "google"; idToken: string } | { method: "otp"; code: string };
+/** Step one, either way in. */
+export type SignInBody = { email: string; password: string } | { google_id_token: string };
+
+/** Step two: the code from the email. */
+export type LoginParams = { code: string };
 export type Challenge = { id: string; sentTo: string; sentAt: number };
 type Me = { id: string; name: string; email: string; role: StaffIdentity["role"]; pages: StaffIdentity["pages"] };
 
@@ -52,21 +56,25 @@ const forget = () => {
   identity = undefined;
 };
 
-/** Step one, either way in: the API starts a challenge and mails the code. */
-async function challenge(body: { email: string; password: string } | { google_id_token: string }) {
+/**
+ * Step one, either way in: the API starts a challenge and mails the code.
+ * Its own request, outside Refine's login: that hook sends a `?to=` deep
+ * link straight to its page on success, before there is a session, and
+ * the page would bounce back to sign-in. The session hook goes to the
+ * verify page itself and carries the deep link along.
+ */
+export async function startSignIn(body: SignInBody): Promise<void> {
   const started = await api.post<{ challenge_id: string; sent_to: string }>("/v1/admin/auth/sign-in", body, { auth: false });
   sessionStorage.setItem(CHALLENGE, JSON.stringify({ id: started.challenge_id, sentTo: started.sent_to, sentAt: Date.now() } satisfies Challenge));
-  return { success: true, redirectTo: "/login/verify" };
 }
 
 export const authProvider: AuthProvider = {
-  login: async (params: LoginParams) => {
+  /** Step two: the code proves the inbox, and only then is there a session. */
+  login: async ({ code }: LoginParams) => {
     try {
-      if (params.method === "password") return await challenge({ email: params.email.trim().toLowerCase(), password: params.password });
-      if (params.method === "google") return await challenge({ google_id_token: params.idToken });
       const pending = readChallenge();
       if (!pending) return failed(new Error("Start again from the sign-in page."));
-      saveTokens(await api.post<Tokens>("/v1/admin/auth/verify", { challenge_id: pending.id, code: params.code }, { auth: false }));
+      saveTokens(await api.post<Tokens>("/v1/admin/auth/verify", { challenge_id: pending.id, code }, { auth: false }));
       sessionStorage.removeItem(CHALLENGE);
       identity = undefined;
       return { success: true, redirectTo: "/" };

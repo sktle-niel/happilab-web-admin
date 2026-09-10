@@ -37,7 +37,7 @@ export function Verify() {
     resendCode().then(
       () => {
         setWait(RESEND_SECONDS);
-        toast(`Code sent again to .`);
+        toast(`Code sent again to ${challenge.sentTo}.`);
       },
       (error: Error) => toast.error(error.message),
     );
