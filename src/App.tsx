@@ -111,7 +111,7 @@ export function App() {
             </Route>
           </Routes>
         </Refine>
-        <Toaster position="bottom-right" toastOptions={{ style: TOAST_STYLE }} />
+        <Toaster position="top-center" toastOptions={{ style: TOAST_STYLE }} />
       </ConfigProvider>
     </BrowserRouter>
   );
