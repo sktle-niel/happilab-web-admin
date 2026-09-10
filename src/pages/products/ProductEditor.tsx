@@ -1,8 +1,8 @@
-import { useList, useOne } from "@refinedev/core";
+import { useOne } from "@refinedev/core";
 import { Button, Form } from "antd";
 import { useNavigate, useParams } from "react-router";
 import { PageHead } from "../../components/Card";
-import type { Product } from "../../data/fake/catalogue";
+import type { Product } from "../../data/types";
 import { required } from "../../lib/rules";
 import { useSaveRecord } from "../../lib/useSaveRecord";
 import { PhotoDrop } from "./PhotoDrop";
@@ -28,7 +28,6 @@ export function ProductEditor() {
   const editing = id !== undefined;
   const [form] = Form.useForm<ProductValues>();
   const { result: record, query } = useOne<Product>({ resource: "products", id: id ?? "", queryOptions: { enabled: editing } });
-  const { result: catalogue } = useList<Product>({ resource: "products", pagination: { mode: "off" }, queryOptions: { enabled: !editing } });
   const { save, busy } = useSaveRecord("products", { created: "Product added", updated: "Product saved", description: "Members see it on their next launch." });
   const { softDelete } = useProductRemoval();
   const watched = Form.useWatch([], form);
@@ -39,13 +38,8 @@ export function ProductEditor() {
 
   const initial = record ? fromRecord(record) : EMPTY;
   const live: ProductValues = { ...initial, ...watched };
-  // A new product joins the end of the order the app shows.
-  const nextPosition = (catalogue?.data ?? []).reduce((max, p) => Math.max(max, p.position), 0) + 1;
-
-  const submit = (values: ProductValues) => {
-    if (record) save(record.id, toRecord(values, record.position), back);
-    else save(null, { ...toRecord(values, nextPosition), deletedAt: null }, back);
-  };
+  // A new product joins the end of the order the app shows; the API gives it its place.
+  const submit = (values: ProductValues) => save(record?.id ?? null, toRecord(values), back);
 
   return (
     <>

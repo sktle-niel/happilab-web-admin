@@ -2,7 +2,8 @@ import { Button, Form, Input } from "antd";
 import { useEffect } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
-import { takeExpiredFlag } from "../../providers/fakeAuthProvider";
+import { googleEnabled } from "../../lib/google";
+import { takeExpiredFlag } from "../../providers/authProvider";
 import { useStaffSession } from "../../providers/session";
 import { Field, LoginShell } from "./LoginShell";
 
@@ -21,11 +22,15 @@ export function Login() {
       <h1>Welcome back</h1>
       <p className="login__lead">Sign in to run the programme. A code goes to your email every time.</p>
 
-      <button type="button" className="login__social" onClick={signInWithGoogle} disabled={isBusy}>
-        <img src="/google-mark.png" alt="" />
-        Continue with Google
-      </button>
-      <div className="login__or"><span>Or</span></div>
+      {googleEnabled && (
+        <>
+          <button type="button" className="login__social" onClick={signInWithGoogle} disabled={isBusy}>
+            <img src="/google-mark.png" alt="" />
+            Continue with Google
+          </button>
+          <div className="login__or"><span>Or</span></div>
+        </>
+      )}
 
       <Form<Credentials> onFinish={({ email, password }) => signInWithPassword(email, password)} requiredMark={false}>
         <Field label="Email">

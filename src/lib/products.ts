@@ -1,4 +1,4 @@
-import type { Product, ProductBadge } from "../data/fake/catalogue";
+import type { Product, ProductBadge } from "../data/types";
 
 /** The storefronts a product can be shared to, in the app's order. */
 export type Store = keyof Product["storeLinks"];

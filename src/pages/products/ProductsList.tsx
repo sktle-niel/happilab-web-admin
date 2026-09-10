@@ -7,7 +7,7 @@ import { useNavigate } from "react-router";
 import { ListCard } from "../../components/ListCard";
 import { SearchBox } from "../../components/SearchBox";
 import { StatusTag } from "../../components/StatusTag";
-import type { Product } from "../../data/fake/catalogue";
+import type { Product } from "../../data/types";
 import { dayLabel, pesos } from "../../lib/format";
 import { STORES, badgeOf } from "../../lib/products";
 import { useSearchFilter } from "../../lib/useSearchFilter";
@@ -21,12 +21,8 @@ const VIEWS = [
   { label: "Deleted", value: "deleted" },
 ];
 
-/** Keyed, so switching the view replaces this filter and leaves the search alone. */
-const viewFilter = (view: View): CrudFilter => ({
-  key: "view",
-  operator: "and",
-  value: [{ field: "deletedAt", operator: view === "deleted" ? "nnull" : "null", value: true }],
-});
+/** Keyed, so switching the view replaces this filter and leaves the search alone; the catalogue is everything not deleted. */
+const viewFilter = (view: View): CrudFilter => ({ key: "view", operator: "and", value: view === "deleted" ? [{ field: "status", operator: "eq", value: "deleted" }] : [] });
 
 const storesOf = (p: Product) => STORES.filter((store) => p.storeLinks[store.key]).map((store) => store.label).join(", ") || "search only";
 

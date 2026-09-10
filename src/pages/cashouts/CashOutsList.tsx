@@ -6,7 +6,7 @@ import { ListCard } from "../../components/ListCard";
 import { RecordModal } from "../../components/RecordModal";
 import { SearchBox } from "../../components/SearchBox";
 import { StatusTag } from "../../components/StatusTag";
-import type { CashOut, CashOutStatus } from "../../data/fake/money";
+import type { CashOut, CashOutStatus } from "../../data/types";
 import { MOVES, type Move } from "../../lib/cashOutMoves";
 import { dayLabel, pesos, thousands } from "../../lib/format";
 import { required } from "../../lib/rules";
@@ -67,12 +67,12 @@ export function CashOutsList() {
     update({
       resource: "cash-outs",
       id: cashOut.id,
-      values: { status: move.to, ...(move.to === "sent" && { sentAt: new Date().toISOString() }) },
+      values: { status: move.to },
       successNotification: said ? { type: "success", message: `${cashOut.reference} ${said.message}`, description: said.description } : false,
     });
   };
 
-  /** Failing returns the points: the provider credits them as the API's ledger would. */
+  /** Failing returns the points: the API credits them back through the ledger and tells the member why. */
   const fail = ({ reason }: { reason: string }) => {
     const cashOut = failing;
     if (!cashOut) return;

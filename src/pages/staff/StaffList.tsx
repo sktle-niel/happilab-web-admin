@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ListCard } from "../../components/ListCard";
 import { Spot } from "../../components/Spot";
 import { StatusTag } from "../../components/StatusTag";
-import type { Staff } from "../../data/fake/people";
+import type { Staff } from "../../data/types";
 import { ROLE_LABELS, describeAccess } from "../../lib/access";
 import { dayLabel, initials } from "../../lib/format";
 import { useAccountStatus } from "../../lib/useAccountStatus";

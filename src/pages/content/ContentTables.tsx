@@ -3,7 +3,7 @@ import { useTable } from "@refinedev/antd";
 import { useUpdate } from "@refinedev/core";
 import { Button, Space, Table } from "antd";
 import { StatusTag } from "../../components/StatusTag";
-import type { Faq, Post, TermsSection } from "../../data/fake/catalogue";
+import type { Faq, Post, TermsSection } from "../../data/types";
 import { dayLabel } from "../../lib/format";
 import { useReorder } from "../../lib/useReorder";
 import { FaqForm, PostForm, SectionForm } from "./ContentForms";
@@ -11,8 +11,6 @@ import { FaqForm, PostForm, SectionForm } from "./ContentForms";
 /** undefined: no form open; null: a new record; otherwise the record being edited. */
 export type Editing<T> = T | null | undefined;
 type Props<T> = { editing: Editing<T>; onEdit: (record: Editing<T>) => void };
-
-const nextPosition = (rows: readonly { position: number }[]) => rows.reduce((max, row) => Math.max(max, row.position), 0) + 1;
 
 /** Up and down swap places with the neighbour; the ends have one direction only. */
 function OrderButtons({ index, count, onMove }: { index: number; count: number; onMove: (direction: -1 | 1) => void }) {
@@ -28,22 +26,22 @@ export function Posts({ editing, onEdit }: Props<Post>) {
   const { tableProps } = useTable<Post>({ resource: "posts", pagination: { mode: "off" }, sorters: { initial: [{ field: "publishedAt", order: "desc" }] } });
   const { mutate: update } = useUpdate<Post>();
   const toggle = (post: Post) => {
-    const status = post.status === "published" ? "draft" : "published";
-    update({ resource: "posts", id: post.id, values: { status }, successNotification: { type: "success", message: status === "published" ? "Post published" : "Post taken down", description: "The feed changes on the next launch." } });
+    const isPublished = !post.isPublished;
+    update({ resource: "posts", id: post.id, values: { isPublished }, successNotification: { type: "success", message: isPublished ? "Post published" : "Post taken down", description: "The feed changes on the next launch." } });
   };
   return (
     <>
       <Table<Post> {...tableProps} rowKey="id" pagination={false}>
         <Table.Column<Post> title="Post" dataIndex="body" render={(v: string) => <div style={{ maxWidth: 480 }}>{v}</div>} />
-        <Table.Column<Post> title="Media" dataIndex="media" render={(v: string) => <span className="cell-muted">{v}</span>} />
+        <Table.Column<Post> title="Media" dataIndex="mediaKind" render={(v: string) => <span className="cell-muted">{v}</span>} />
         <Table.Column<Post> title="Likes" dataIndex="likes" />
         <Table.Column<Post> title="Comments" dataIndex="comments" />
-        <Table.Column title="Status" dataIndex="status" render={(s: string) => <StatusTag status={s} />} />
+        <Table.Column<Post> title="Status" dataIndex="isPublished" render={(v: boolean) => <StatusTag status={v ? "published" : "draft"} />} />
         <Table.Column<Post> title="Published" dataIndex="publishedAt" className="cell-nowrap" render={(v: string) => <span className="cell-muted">{dayLabel(new Date(v))}</span>} />
         <Table.Column<Post> title="" render={(_, post) => (
           <Space>
             <Button size="small" onClick={() => onEdit(post)}>Edit</Button>
-            <Button size="small" type="text" onClick={() => toggle(post)}>{post.status === "published" ? "Unpublish" : "Publish"}</Button>
+            <Button size="small" type="text" onClick={() => toggle(post)}>{post.isPublished ? "Unpublish" : "Publish"}</Button>
           </Space>
         )} />
       </Table>
@@ -74,7 +72,7 @@ export function Faqs({ editing, onEdit }: Props<Faq>) {
           </Space>
         )} />
       </Table>
-      <FaqForm open={editing !== undefined} record={editing ?? null} onClose={() => onEdit(undefined)} nextPosition={nextPosition(rows)} />
+      <FaqForm open={editing !== undefined} record={editing ?? null} onClose={() => onEdit(undefined)} />
     </>
   );
 }
@@ -96,7 +94,7 @@ export function Terms({ editing, onEdit }: Props<TermsSection>) {
           </Space>
         )} />
       </Table>
-      <SectionForm open={editing !== undefined} record={editing ?? null} onClose={() => onEdit(undefined)} nextPosition={nextPosition(rows)} />
+      <SectionForm open={editing !== undefined} record={editing ?? null} onClose={() => onEdit(undefined)} />
     </>
   );
 }

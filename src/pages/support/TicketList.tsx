@@ -2,7 +2,7 @@ import { useTable } from "@refinedev/antd";
 import { Segmented } from "antd";
 import { useState } from "react";
 import { StatusTag } from "../../components/StatusTag";
-import { categoryLabel, type Ticket, type TicketStatus } from "../../data/fake/tickets";
+import { categoryLabel, type Ticket, type TicketStatus } from "../../data/types";
 import { dayLabel } from "../../lib/format";
 
 type Pile = "open" | "done";
@@ -38,7 +38,7 @@ export function TicketList({ selectedId, onOpen }: { selectedId: string | undefi
             <div className="chat-row__snippet">{t.summary}</div>
             <div className="chat-row__tags">
               <StatusTag status={t.status} label={TICKET_LABELS[t.status]} />
-              <small className="cell-muted">{categoryLabel(t.category)} · {t.assignee ?? "nobody yet"}</small>
+              <small className="cell-muted">{categoryLabel(t.category)} · {t.assigneeName ?? "nobody yet"}</small>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import type { CashOutStatus } from "../data/fake/money";
+import type { CashOutStatus } from "../data/types";
 
 /** One step a request can take from where it stands; the API enforces the same moves. */
 export type Move = { label: string; to: CashOutStatus; tone: "primary" | "quiet" | "danger" };

@@ -2,7 +2,7 @@ import { useUpdate } from "@refinedev/core";
 import { undoToast } from "./undoToast";
 
 export type AccountStatus = "active" | "suspended";
-type Account = { id: string; name: string };
+export type Account = { id: string; name: string };
 type Words = { off: string; on: string; offDescription: string; onDescription: string };
 
 /**
