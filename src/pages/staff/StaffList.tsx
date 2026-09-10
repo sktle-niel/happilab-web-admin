@@ -43,7 +43,7 @@ export function StaffList() {
     <ListCard
       title="Staff"
       subtitle="Who runs the programme, and which pages each of them may open."
-      aside={<Spot id="add-staff" inline><Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>Add staff</Button></Spot>}
+      aside={<Spot id="add-staff" inline><Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>Add support</Button></Spot>}
     >
       <Table<Staff> {...tableProps} rowKey="id" pagination={false}>
         <Table.Column<Staff> title="Account" dataIndex="name" render={(_, s) => (

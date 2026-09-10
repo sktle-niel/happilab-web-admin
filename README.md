@@ -35,9 +35,13 @@ email — in development the API prints it in its own terminal. Set
 with Google". A staff account added without a password is emailed a link
 to choose one.
 
-Access is per account: the Staff page sets which pages each one may open,
-and the sidebar, the routes, the dashboard's cards and the search follow;
-the API enforces the same list on every route.
+Two levels of staff: the owner, one account that runs everything, and
+support accounts, as many as the desk needs, which the Staff page adds.
+Access is per account: the Staff page sets which pages each support
+account may open, and the sidebar, the routes, the dashboard's cards and
+the search follow; the API enforces the same list on every route, and
+keeps money, the catalogue, the copy, the settings and the staff list to
+the owner.
 
 ## How it talks to the API
 

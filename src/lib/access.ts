@@ -18,18 +18,22 @@ export const PAGES = [
 ] as const;
 
 export type PageKey = (typeof PAGES)[number]["key"];
-export type StaffRole = "owner" | "admin" | "support";
+export type StaffRole = "owner" | "support";
 
 export const ALL_PAGES: PageKey[] = PAGES.map((page) => page.key);
 
-/** What each role starts with; an account can be given more or less afterwards, except the owner. */
+/**
+ * Two levels of staff: the owner, one account that runs everything, and
+ * support, as many as the desk needs. A support account starts with the
+ * preset and can be given more or fewer pages afterwards; what it may
+ * change on them is the API's to decide.
+ */
 export const ROLE_PRESETS: Record<StaffRole, PageKey[]> = {
   owner: ALL_PAGES,
-  admin: ALL_PAGES.filter((key) => key !== "staff"),
   support: ["dashboard", "support", "cash-outs", "products", "members"],
 };
 
-export const ROLE_LABELS: Record<StaffRole, string> = { owner: "Owner", admin: "Admin", support: "Support" };
+export const ROLE_LABELS: Record<StaffRole, string> = { owner: "Owner", support: "Support" };
 
 export const isPageKey = (value: string): value is PageKey => ALL_PAGES.includes(value as PageKey);
 
