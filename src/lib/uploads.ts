@@ -12,7 +12,7 @@ type Signed = { path: string; uploadUrl: string; token: string; publicUrl: strin
  * storage configured — is the sentence the page shows.
  */
 export async function uploadFile(kind: UploadKind, file: File): Promise<string> {
-  const signed = toCamel<Signed>(await api.post("/v1/admin/uploads/sign", { kind, content_type: file.type }));
+  const signed = toCamel<Signed>(await api.post("/v1/admin/uploads/sign", { kind, content_type: file.type, content_length: file.size }));
   const url = signed.uploadUrl.includes("token=") ? signed.uploadUrl : `${signed.uploadUrl}?token=${encodeURIComponent(signed.token)}`;
   const response = await fetch(url, { method: "PUT", headers: { "content-type": file.type, "x-upsert": "false" }, body: file }).catch(() => null);
   if (!response?.ok) throw new Error("The file did not reach storage. Try again.");
