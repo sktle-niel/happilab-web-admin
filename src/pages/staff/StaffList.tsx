@@ -1,7 +1,8 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useTable } from "@refinedev/antd";
+import { useDelete } from "@refinedev/core";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Space, Table } from "antd";
+import { Button, Popconfirm, Space, Table } from "antd";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ListCard } from "../../components/ListCard";
@@ -35,6 +36,18 @@ function useResendCode() {
   return { resend: mutate, sending: isPending };
 }
 
+/** An invitation the owner takes back: the pending row goes, and its code with it. */
+function useWithdraw() {
+  const { mutate } = useDelete<Staff>();
+  return (account: Staff) =>
+    mutate({
+      resource: "staff",
+      id: account.id,
+      successNotification: { type: "success", message: `${account.name} removed`, description: "The code that was sent no longer opens anything." },
+      errorNotification: (error?: { message?: string }) => ({ type: "error", message: error?.message ?? "That account could not be removed." }),
+    });
+}
+
 type SwitchProps = { account: Staff; onDisable: (s: Staff) => void; onEnable: (s: Staff) => void };
 
 function StaffSwitch({ account, onDisable, onEnable }: SwitchProps) {
@@ -50,6 +63,7 @@ export function StaffList() {
   const { identity } = useStaffSession();
   const { disable, enable } = useAccountStatus("staff", WORDS);
   const { resend, sending } = useResendCode();
+  const withdraw = useWithdraw();
   const [editing, setEditing] = useState<Staff | null | undefined>(undefined);
   // The API refuses edits to the owner and to oneself, so neither row offers them.
   const untouchable = (s: Staff) => s.role === "owner" || s.id === identity?.id;
@@ -74,7 +88,12 @@ export function StaffList() {
           <Space>
             <Button size="small" onClick={() => setEditing(s)}>Edit access</Button>
             {s.status === "pending" ? (
-              <Button size="small" loading={sending} onClick={() => resend(s)}>Resend code</Button>
+              <>
+                <Button size="small" loading={sending} onClick={() => resend(s)}>Resend code</Button>
+                <Popconfirm title="Remove this invitation?" description="The code already sent will no longer open anything." okText="Remove" onConfirm={() => withdraw(s)}>
+                  <Button size="small" type="text" danger>Remove</Button>
+                </Popconfirm>
+              </>
             ) : (
               <StaffSwitch account={s} onDisable={disable} onEnable={enable} />
             )}
