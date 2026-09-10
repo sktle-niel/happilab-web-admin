@@ -73,7 +73,7 @@ export function ProductsList() {
           </div>
         )} />
         <Table.Column<Product> title="Price" dataIndex="priceCentavos" render={(v: number) => pesos(v / 100)} />
-        <Table.Column<Product> title="Points per sale" render={(_, p) => `${p.pointsMin}–${p.pointsMax} pts`} />
+        <Table.Column<Product> title="Points per sale" render={(_, p) => `${p.points} pts`} />
         <Table.Column<Product> title="Badge" dataIndex="badge" render={(b: Product["badge"]) => (b ? <span className="chip chip--lavender">{badgeOf(b)?.label ?? b}</span> : <span className="cell-muted">—</span>)} />
         <Table.Column<Product> title="Stores" render={(_, p) => <span className="cell-muted">{storesOf(p)}</span>} />
         {deleted ? (

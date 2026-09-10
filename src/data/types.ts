@@ -17,8 +17,8 @@ export type Product = {
   name: string;
   blurb: string;
   priceCentavos: number;
-  pointsMin: number;
-  pointsMax: number;
+  /** What the referrer earns per unit sold. */
+  points: number;
   imageUrl: string;
   badge: ProductBadge;
   isActive: boolean;
