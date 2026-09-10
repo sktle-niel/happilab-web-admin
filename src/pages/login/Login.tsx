@@ -48,7 +48,6 @@ export function Login() {
         </div>
         <Button type="primary" htmlType="submit" block loading={isBusy} className="login__submit">Continue</Button>
       </Form>
-      <p className="login__note"><Link to="/login/activate" className="login__link">New to the desk? Activate your account</Link></p>
     </LoginShell>
   );
 }
