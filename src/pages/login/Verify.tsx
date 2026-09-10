@@ -52,6 +52,12 @@ export function Verify() {
 
   if (!challenge) return <Navigate to="/login" replace />;
 
+  /** One try per code: the field clears as it goes out, so the sixth digit and the button cannot send the same guess twice, and a wrong one is retyped rather than resent. */
+  const attempt = (value: string) => {
+    setCode("");
+    verify(value);
+  };
+
   const resend = () =>
     resendCode().then(
       () => {
@@ -72,14 +78,14 @@ export function Verify() {
         maxLength={LENGTH}
         value={code}
         onChange={setCode}
-        onComplete={verify}
+        onComplete={attempt}
         pattern={REGEXP_ONLY_DIGITS}
         inputMode="numeric"
         autoFocus
         containerClassName="otp"
         render={({ slots }) => slots.map((slot, i) => <Slot key={i} {...slot} />)}
       />
-      <Button type="primary" block className="login__submit" loading={isBusy} disabled={code.length < LENGTH} onClick={() => verify(code)}>
+      <Button type="primary" block className="login__submit" loading={isBusy} disabled={code.length < LENGTH} onClick={() => attempt(code)}>
         Verify
       </Button>
       <p className="login__note">
