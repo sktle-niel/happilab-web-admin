@@ -2,7 +2,7 @@ import type { AuthProvider } from "@refinedev/core";
 import { ApiError, api } from "../lib/api";
 import { passwordMeetsPolicy } from "../lib/password";
 import type { StaffIdentity } from "./session";
-import { accessToken, readTokens, saveTokens, type Tokens } from "./tokens";
+import { accessToken, markExpired, readTokens, saveTokens, type Tokens } from "./tokens";
 
 /**
  * Staff sign-in against the API in two steps: who you are, then the code
@@ -10,7 +10,6 @@ import { accessToken, readTokens, saveTokens, type Tokens } from "./tokens";
  * them is read once per session and forgotten on sign-out.
  */
 const CHALLENGE = "happilab-admin.challenge";
-const EXPIRED = "happilab-admin.expired";
 
 /** Step one, either way in. */
 export type SignInBody = { email: string; password: string } | { google_id_token: string };
@@ -45,13 +44,6 @@ export async function resendCode(): Promise<void> {
   if (!pending) return;
   await api.post("/v1/admin/auth/resend", { challenge_id: pending.id }, { auth: false });
   sessionStorage.setItem(CHALLENGE, JSON.stringify({ ...pending, sentAt: Date.now() } satisfies Challenge));
-}
-
-/** True once, right after a session ended for staying away too long. */
-export function takeExpiredFlag(): boolean {
-  const was = sessionStorage.getItem(EXPIRED) === "1";
-  sessionStorage.removeItem(EXPIRED);
-  return was;
 }
 
 const failed = (error: unknown) => ({ success: false, error: { name: "Sign in failed", message: error instanceof Error ? error.message : "Something went wrong." } });
@@ -114,7 +106,7 @@ export const authProvider: AuthProvider = {
   check: async () => {
     if (!readTokens()) return signedOut;
     if (await accessToken()) return { authenticated: true };
-    sessionStorage.setItem(EXPIRED, "1");
+    markExpired();
     forget();
     return signedOut;
   },
