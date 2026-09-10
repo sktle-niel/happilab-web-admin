@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router";
 import { ListCard } from "../../components/ListCard";
 import { Spot } from "../../components/Spot";
 import type { Faq, Post, TermsSection } from "../../data/types";
+import { useIsOwner } from "../../providers/session";
 import { Faqs, Posts, Terms, type Editing } from "./ContentTables";
 
 type Tab = "posts" | "faqs" | "terms";
@@ -23,11 +24,12 @@ export function ContentPage() {
   const [section, setSection] = useState<Editing<TermsSection>>(undefined);
   const openNew: Record<Tab, () => void> = { posts: () => setPost(null), faqs: () => setFaq(null), terms: () => setSection(null) };
   const current = TABS.find((t) => t.key === tab) ?? TABS[0]!;
+  const owner = useIsOwner();
   return (
     <ListCard
       title="Content"
-      subtitle="What the feed says, the help copy members read, and the terms they joined under."
-      aside={<Button type="primary" icon={<PlusOutlined />} onClick={openNew[tab]}>{current.add}</Button>}
+      subtitle={owner ? "What the feed says, the help copy members read, and the terms they joined under." : "What the feed says, the help copy members read, and the terms they joined under. Only the owner changes them."}
+      aside={owner ? <Button type="primary" icon={<PlusOutlined />} onClick={openNew[tab]}>{current.add}</Button> : undefined}
     >
       <Tabs
         activeKey={tab}

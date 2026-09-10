@@ -6,6 +6,7 @@ import { StatusTag } from "../../components/StatusTag";
 import type { Faq, Post, TermsSection } from "../../data/types";
 import { dayLabel } from "../../lib/format";
 import { useReorder } from "../../lib/useReorder";
+import { useIsOwner } from "../../providers/session";
 import { FaqForm, PostForm, SectionForm } from "./ContentForms";
 
 /** undefined: no form open; null: a new record; otherwise the record being edited. */
@@ -22,7 +23,9 @@ function OrderButtons({ index, count, onMove }: { index: number; count: number; 
   );
 }
 
+/** Every row control below is the owner's; support reads the tables as members will read the app. */
 export function Posts({ editing, onEdit }: Props<Post>) {
+  const owner = useIsOwner();
   const { tableProps } = useTable<Post>({ resource: "posts", pagination: { mode: "off" }, sorters: { initial: [{ field: "publishedAt", order: "desc" }] } });
   const { mutate: update } = useUpdate<Post>();
   const toggle = (post: Post) => {
@@ -38,12 +41,14 @@ export function Posts({ editing, onEdit }: Props<Post>) {
         <Table.Column<Post> title="Comments" dataIndex="comments" />
         <Table.Column<Post> title="Status" dataIndex="isPublished" render={(v: boolean) => <StatusTag status={v ? "published" : "draft"} />} />
         <Table.Column<Post> title="Published" dataIndex="publishedAt" className="cell-nowrap" render={(v: string) => <span className="cell-muted">{dayLabel(new Date(v))}</span>} />
-        <Table.Column<Post> title="" render={(_, post) => (
-          <Space>
-            <Button size="small" onClick={() => onEdit(post)}>Edit</Button>
-            <Button size="small" type="text" onClick={() => toggle(post)}>{post.isPublished ? "Unpublish" : "Publish"}</Button>
-          </Space>
-        )} />
+        {owner && (
+          <Table.Column<Post> title="" render={(_, post) => (
+            <Space>
+              <Button size="small" onClick={() => onEdit(post)}>Edit</Button>
+              <Button size="small" type="text" onClick={() => toggle(post)}>{post.isPublished ? "Unpublish" : "Publish"}</Button>
+            </Space>
+          )} />
+        )}
       </Table>
       <PostForm open={editing !== undefined} record={editing ?? null} onClose={() => onEdit(undefined)} />
     </>
@@ -51,6 +56,7 @@ export function Posts({ editing, onEdit }: Props<Post>) {
 }
 
 export function Faqs({ editing, onEdit }: Props<Faq>) {
+  const owner = useIsOwner();
   const { tableProps } = useTable<Faq>({ resource: "faqs", pagination: { mode: "off" }, sorters: { initial: [{ field: "position", order: "asc" }] } });
   const { mutate: update } = useUpdate<Faq>();
   const { move } = useReorder("faqs");
@@ -64,13 +70,15 @@ export function Faqs({ editing, onEdit }: Props<Faq>) {
         <Table.Column<Faq> title="Question" dataIndex="question" render={(v: string) => <span className="cell-primary">{v}</span>} />
         <Table.Column<Faq> title="Answer" dataIndex="answer" />
         <Table.Column<Faq> title="Status" dataIndex="isActive" render={(v: boolean) => <StatusTag status={v ? "published" : "draft"} label={v ? "Shown" : "Hidden"} />} />
-        <Table.Column<Faq> title="" render={(_, faq, index) => (
-          <Space>
-            <OrderButtons index={index} count={rows.length} onMove={(direction) => move(rows, index, direction)} />
-            <Button size="small" onClick={() => onEdit(faq)}>Edit</Button>
-            <Button size="small" type="text" onClick={() => toggle(faq)}>{faq.isActive ? "Hide" : "Show"}</Button>
-          </Space>
-        )} />
+        {owner && (
+          <Table.Column<Faq> title="" render={(_, faq, index) => (
+            <Space>
+              <OrderButtons index={index} count={rows.length} onMove={(direction) => move(rows, index, direction)} />
+              <Button size="small" onClick={() => onEdit(faq)}>Edit</Button>
+              <Button size="small" type="text" onClick={() => toggle(faq)}>{faq.isActive ? "Hide" : "Show"}</Button>
+            </Space>
+          )} />
+        )}
       </Table>
       <FaqForm open={editing !== undefined} record={editing ?? null} onClose={() => onEdit(undefined)} />
     </>
@@ -78,6 +86,7 @@ export function Faqs({ editing, onEdit }: Props<Faq>) {
 }
 
 export function Terms({ editing, onEdit }: Props<TermsSection>) {
+  const owner = useIsOwner();
   const { tableProps } = useTable<TermsSection>({ resource: "terms", pagination: { mode: "off" }, sorters: { initial: [{ field: "position", order: "asc" }] } });
   const { move } = useReorder("terms");
   const rows = (tableProps.dataSource ?? []) as TermsSection[];
@@ -87,12 +96,14 @@ export function Terms({ editing, onEdit }: Props<TermsSection>) {
         <Table.Column<TermsSection> title="#" dataIndex="position" width={60} />
         <Table.Column<TermsSection> title="Heading" dataIndex="heading" render={(v: string) => <span className="cell-primary">{v}</span>} />
         <Table.Column<TermsSection> title="Text" dataIndex="body" render={(v: string) => <div style={{ maxWidth: 560 }}>{v}</div>} />
-        <Table.Column<TermsSection> title="" render={(_, section, index) => (
-          <Space>
-            <OrderButtons index={index} count={rows.length} onMove={(direction) => move(rows, index, direction)} />
-            <Button size="small" onClick={() => onEdit(section)}>Edit</Button>
-          </Space>
-        )} />
+        {owner && (
+          <Table.Column<TermsSection> title="" render={(_, section, index) => (
+            <Space>
+              <OrderButtons index={index} count={rows.length} onMove={(direction) => move(rows, index, direction)} />
+              <Button size="small" onClick={() => onEdit(section)}>Edit</Button>
+            </Space>
+          )} />
+        )}
       </Table>
       <SectionForm open={editing !== undefined} record={editing ?? null} onClose={() => onEdit(undefined)} />
     </>

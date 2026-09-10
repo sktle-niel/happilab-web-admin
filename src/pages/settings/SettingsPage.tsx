@@ -4,6 +4,7 @@ import { PageHead } from "../../components/Card";
 import type { SettingKey, Settings } from "../../data/types";
 import { API_BASE_URL } from "../../lib/config";
 import { useSaveSetting, useSettings } from "../../lib/useSettings";
+import { useIsOwner } from "../../providers/session";
 import { AssetsCard } from "./AssetsCard";
 import { Field, SettingsCard } from "./SettingsCard";
 
@@ -19,6 +20,7 @@ const tidyProgramme = (value: Settings["programme"]): Settings["programme"] => (
 export function SettingsPage() {
   const { settings } = useSettings();
   const { save, saving } = useSaveSetting();
+  const owner = useIsOwner();
   if (!settings) return <PageHead title="Settings" subtitle="Loading what the app says, shows and promises…" />;
   const submit =
     <K extends SettingKey>(key: K, label: string, tidy: (value: Settings[K]) => Settings[K] = (value) => value) =>
@@ -29,36 +31,36 @@ export function SettingsPage() {
       );
   return (
     <>
-      <PageHead title="Settings" subtitle="What the app says, shows and promises. Every change reaches members on their next launch." />
+      <PageHead title="Settings" subtitle={owner ? "What the app says, shows and promises. Every change reaches members on their next launch." : "What the app says, shows and promises. Only the owner changes these."} />
       <div className="settings-grid stagger">
         <SettingsCard title="Brand" spot="brand">
-          <Form layout="vertical" initialValues={settings.brand} onFinish={submit("brand", "Brand")} requiredMark={false}>
+          <Form layout="vertical" disabled={!owner} initialValues={settings.brand} onFinish={submit("brand", "Brand")} requiredMark={false}>
             <Field spot="brand-name" name="name" label="App name" rules={[{ required: true, min: 2, max: 40 }]}><Input /></Field>
             <Field spot="brand-tagline" name="tagline" label="Tagline" rules={[{ max: 120 }]}><Input /></Field>
             <Field spot="brand-support-name" name="supportName" label="Support name" rules={[{ required: true, min: 2, max: 60 }]}><Input /></Field>
-            <Button type="primary" htmlType="submit" loading={saving}>Save brand</Button>
+            {owner && <Button type="primary" htmlType="submit" loading={saving}>Save brand</Button>}
           </Form>
         </SettingsCard>
 
         <SettingsCard title="Programme" spot="programme">
-          <Form layout="vertical" initialValues={settings.programme} onFinish={submit("programme", "Programme", tidyProgramme)} requiredMark={false}>
+          <Form layout="vertical" disabled={!owner} initialValues={settings.programme} onFinish={submit("programme", "Programme", tidyProgramme)} requiredMark={false}>
             <Field spot="earn-rate" name="earnRateLabel" label="Earn rate, as shown" rules={[{ required: true, max: 20 }]}><Input /></Field>
             <Field spot="points-per-peso" name="pointsPerPeso" label="Points per peso" rules={[{ required: true }]}><InputNumber min={1} max={1000} {...wide} /></Field>
             <Field spot="min-cash-out" name="minCashOutPoints" label="Minimum cash-out, points" rules={[{ required: true }]}><InputNumber min={100} max={1_000_000} step={100} {...wide} /></Field>
             <Field spot="cash-out-presets" name="cashOutPresets" label="Preset amounts"><Select mode="tags" tokenSeparators={[","]} /></Field>
             <Field spot="payout-methods" name="payoutMethods" label="Payout methods" rules={[{ required: true, message: "Keep at least one wallet." }]}><Checkbox.Group options={[{ label: "GCash", value: "gcash" }, { label: "Maya", value: "maya" }]} /></Field>
             <Field spot="arrival-note" name="arrivalNote" label="Arrival note" rules={[{ required: true, max: 120 }]}><Input /></Field>
-            <Button type="primary" htmlType="submit" loading={saving}>Save programme</Button>
+            {owner && <Button type="primary" htmlType="submit" loading={saving}>Save programme</Button>}
           </Form>
         </SettingsCard>
 
         <AssetsCard />
 
         <SettingsCard title="Support copy" spot="support-copy">
-          <Form layout="vertical" initialValues={settings.support} onFinish={submit("support", "Support copy")} requiredMark={false}>
+          <Form layout="vertical" disabled={!owner} initialValues={settings.support} onFinish={submit("support", "Support copy")} requiredMark={false}>
             <Field spot="status-line" name="statusLine" label="Status line" rules={[{ required: true, max: 80 }]}><Input /></Field>
             <Field spot="acknowledgement" name="acknowledgement" label="Acknowledgement" rules={[{ required: true, max: 200 }]}><Input.TextArea rows={3} /></Field>
-            <Button type="primary" htmlType="submit" loading={saving}>Save support copy</Button>
+            {owner && <Button type="primary" htmlType="submit" loading={saving}>Save support copy</Button>}
           </Form>
         </SettingsCard>
 

@@ -2,7 +2,7 @@ import { useForgotPassword, useGetIdentity, useLogin, useLogout, useUpdatePasswo
 import { useMutation } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
-import type { PageKey, StaffRole } from "../lib/access";
+import { isOwner, type PageKey, type StaffRole } from "../lib/access";
 import { googleIdToken } from "../lib/google";
 import { startSignIn, type LoginParams } from "./authProvider";
 
@@ -39,4 +39,10 @@ export function useStaffSession() {
     activate: (email: string, code: string, password: string) => login({ email, code, password }),
     signOut: () => logout(),
   };
+}
+
+/** Whether the signed-in account is the owner: the pages hide what only the owner may change. */
+export function useIsOwner() {
+  const { identity } = useStaffSession();
+  return isOwner(identity?.role);
 }
